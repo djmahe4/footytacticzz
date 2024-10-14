@@ -1,4 +1,7 @@
 Python 3.x
+pulp
+ultrallytics
+supervision
 opencv-python
 gc
 numpy
