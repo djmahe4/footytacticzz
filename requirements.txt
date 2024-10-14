@@ -1,5 +1,6 @@
 Python 3.x
 pulp
+google-generativeai
 ultrallytics
 supervision
 opencv-python
