@@ -17,12 +17,17 @@ from player_stats import PlayerStats
 from team_stats import SoccerMatchDataProcessorFullWithSubs
 from recommendation_systems import MyPlayerStats, FirstModel, SecondModel
 from utils import clean_team_color, find_closest_player_dataset, find_closest_match
+from utils import send_to_gemini_api_with_retry
+from generate_prompt import generate_match_summary_prompt, generate_opponent_analysis_prompt, generate_training_suggestions_prompt
 
 install_requirements('requirements.txt')
 
 import cv2
 import gc
 import pandas as pd
+import os
+import google.generativeai as genai
+import json
 
 def main():
     """
@@ -350,11 +355,65 @@ def main():
 
 
                                   End of recommendation systems part
-
+                                  Start of LLM part
 
 
 
 
     """
+    # Set the environment variable in the current notebook session
+    os.environ["GEMINI_API_KEY"] = "AIzaSyBv4nX97Do78jNAM0Kl5_DFE96qWsBfgbM"
+
+    opponent_info = pd.read_csv(r'output_files_recommendation_systems/opponent_team.csv')
+    opponent_info_str = opponent_info.to_string(index=False)
+
+    opponent_players = pd.read_csv(r'output_files_recommendation_systems/closest_player_data_mobile2.csv')
+    opponent_players_str = opponent_players.to_string(index=False)
+
+    my_team_info = pd.read_csv(r'output_files_recommendation_systems/my_team.csv')
+    my_team_info_str = my_team_info.to_string(index=False)
+
+    my_team_players = pd.read_csv(r'output_files_recommendation_systems/closest_player_data_mobile1.csv')
+    my_team_players_str = my_team_players.to_string(index=False)
+
+    # Configure the Gemini API key
+    genai.configure(api_key=os.environ["GEMINI_API_KEY"])
+
+        # Generate the match summary prompt
+    match_summary_prompt = generate_match_summary_prompt(my_team_info_str, opponent_info_str)
+    match_summary_json = send_to_gemini_api_with_retry(match_summary_prompt)
+
+    if match_summary_json:
+        print("Match Summary Result:")
+        print(json.dumps(match_summary_json, indent=4))
+    else:
+        print("Failed to retrieve valid JSON for match summary.")
+
+    # Generate the opponent analysis prompt
+    opponent_analysis_prompt = generate_opponent_analysis_prompt(opponent_info_str, opponent_players_str)
+    opponent_analysis_json = send_to_gemini_api_with_retry(opponent_analysis_prompt)
+
+    if opponent_analysis_json:
+        print("Opponent Analysis Result:")
+        print(json.dumps(opponent_analysis_json, indent=4))
+    else:
+        print("Failed to retrieve valid JSON for opponent analysis.")
+
+    # Generate the training suggestions prompt
+    training_suggestions_prompt = generate_training_suggestions_prompt(my_team_players_str, my_team_info_str, opponent_analysis_json)
+    training_suggestions_json = send_to_gemini_api_with_retry(training_suggestions_prompt)
+
+    if training_suggestions_json:
+        # Prepare the output structure
+        output = {
+            "team_training_session": training_suggestions_json.get("team_training_session", ""),
+            "worst_5_players_individual_sessions": training_suggestions_json.get("individual_sessions", {})[:4] 
+        }
+
+        print("Training Suggestions Result:")
+        print(json.dumps(output, indent=4))
+    else:
+        print("Failed to retrieve valid JSON for training suggestions.")
+
 if __name__ == '__main__':
     main()
