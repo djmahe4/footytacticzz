@@ -1,10 +1,14 @@
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel
+import os
+import pandas as pd
+import json
+import google.generativeai as genai
+import uvicorn
 import cv2
 import gc
-import pandas as pd
-import os
-import google.generativeai as genai
-import json
 
+# Import your modules here
 from utils import initialize_dataframe, initialize_team_df, read_video_in_batches, save_tracks_to_csv, install_requirements
 from trackers import Tracker
 from team_assigner import TeamAssigner
@@ -25,33 +29,30 @@ from team_stats import SoccerMatchDataProcessorFullWithSubs
 from recommendation_systems import MyPlayerStats, FirstModel, SecondModel
 from utils import clean_team_color, find_closest_player_dataset, find_closest_match
 from utils import send_to_gemini_api_with_retry
-from generate_prompt import generate_match_summary_prompt,generate_player_suggestions_prompt, generate_opponent_analysis_prompt, generate_training_suggestions_prompt
+from generate_prompt import generate_match_summary_prompt, generate_player_suggestions_prompt, generate_opponent_analysis_prompt, generate_training_suggestions_prompt
 
-def main():
-    """
+# Initialize the FastAPI app
+app = FastAPI()
 
+# Global variable to store video paths and JSON outputs
+json_outputs = {}
 
+# Pydantic model to validate input data for POST request
+class VideoPaths(BaseModel):
+    video_paths: list[str]
 
+# Define the process_videos function that contains your detailed processing logic
+def process_videos(video_paths):
+    global json_outputs
+    # Clear previous outputs
+    json_outputs = {}
+    
+    install_requirements('requirements.txt')  # Ensure dependencies are installed
 
-                                  Start of computer vision part
-
-
-
-
-
-    """
-    install_requirements('requirements.txt')
-    # List of video file paths
-    video_paths = [
-        'input_videos/Untitled design.mp4',
-        'input_videos/input_vid.mp4'
-    ]
-
-    # Loop through each video
+    # Loop through each video path
     for video_index, video_path in enumerate(video_paths):
-        # Initialize DataFrames and persistent objects for each video
-        df = initialize_dataframe()  # Initialize empty DataFrame for players
-        team_df = initialize_team_df()  # Initialize empty DataFrame for teams
+        df = initialize_dataframe()  # Initialize DataFrame for players
+        team_df = initialize_team_df()  # Initialize DataFrame for teams
         tracker = Tracker('models/old_data.pt')  # Initialize tracker
         team_assigner = TeamAssigner()
         
@@ -68,6 +69,7 @@ def main():
                                '3-4-2-1', '4-5-1', '4-3-1-2', '4-2-2-2', '3-5-1-1', '4-1-3-2', 
                                '5-3-2', '3-3-3-1', '4-2-4']
         i = 0
+        
         # Loop through the video, processing batch_size frames at a time
         for start_frame in range(0, total_frames, batch_size):
             i += 1
@@ -78,7 +80,7 @@ def main():
             if len(video_frames) == 0:
                 break
 
-            # Process batch: Initialize per-batch objects and perform operations
+            # Process batch
             tracks = tracker.get_object_tracks(video_frames)  # Get object tracks for batch
             tracker.add_position_to_tracks(tracks)  # Add position to tracks
 
@@ -149,66 +151,49 @@ def main():
             df, team_df = shot_detector.process_frames_in_batches()
 
             # Initialize OCR
-            player_number_tracker = PlayerShirtNumberTracker(video_frames, tracks, df,
-                                           'models/playershirt.pt')
-
-            # OCR: Detect player shirt numbers and update DataFrame
+            player_number_tracker = PlayerShirtNumberTracker(video_frames, tracks, df, 'models/playershirt.pt')
             df = player_number_tracker.run()
 
-            # Initialize FormationDetector for each batch
+            # Initialize FormationDetector
             formation_detector = FormationDetector(tracks, possible_formations, team_df)
-
-            # Formation Detection
             team_df = formation_detector.process_frames_in_batches()
-            
+
             # Initialize SubstitutionDetector
             detector = SubstitutionDetector(class_thresholds, 'models/Substitution.pt', team_df)
-            # Run the extraction process
             ocr_results, team_df = detector.extract_annotation(video_frames, filtered_detections, tracks)
-            
+
             # Delete batch-specific objects and free up memory
             del video_frames, camera_movement_estimator, view_transformer, speed_and_distance_estimator
             del player_assigner, pass_detector, yolo_processor, event_processor, processor, shot_detector
             del filtered_detections, player_number_tracker, formation_detector, detector, ocr_results
 
-            # Force garbage collection
-            gc.collect()
+            gc.collect()  # Force garbage collection
 
-            # After processing all batches, fill in any missing data in DataFrames
-            df = df.fillna(0)
+        # Fill in missing data
+        df = df.fillna(0)
 
-            # Final statistics processing for teams and players
-            player_stats = PlayerStats(df)
-            team_1_df, team_2_df = player_stats.process_data()
-        
-            processor = SoccerMatchDataProcessorFullWithSubs(team_1_df, team_2_df, team_df)
-            final_df = processor.process_match_data()
+        # Final statistics processing
+        player_stats = PlayerStats(df)
+        team_1_df, team_2_df = player_stats.process_data()
 
-            # Save tracks and DataFrames to CSV files with unique names for each video
-            output_suffix = f"_video_{video_index+1}"
-            save_tracks_to_csv(tracks, csv_path=f'output_files_computer_vision/tracks_csv{output_suffix}.csv')
-            df.to_csv(f'output_files_computer_vision/player_statistics{output_suffix}.csv', index=True)
-            team_df.to_csv(f'output_files_computer_vision/team_statistics{output_suffix}.csv', index=True)
-            team_1_df.to_csv(f'output_files_computer_vision/team_1_player_statistics{output_suffix}.csv', index=True)
-            team_2_df.to_csv(f'output_files_computer_vision/team_2_player_statistics{output_suffix}.csv', index=True)
-            final_df.to_csv(f'output_files_computer_vision/teams_final_statistics{output_suffix}.csv', index=True)
+        processor = SoccerMatchDataProcessorFullWithSubs(team_1_df, team_2_df, team_df)
+        final_df = processor.process_match_data()
+
+        # Save CSVs
+        output_suffix = f"_video_{video_index + 1}"
+        save_tracks_to_csv(tracks, csv_path=f'output_files_computer_vision/tracks_csv{output_suffix}.csv')
+        df.to_csv(f'output_files_computer_vision/player_statistics{output_suffix}.csv', index=True)
+        team_df.to_csv(f'output_files_computer_vision/team_statistics{output_suffix}.csv', index=True)
+        team_1_df.to_csv(f'output_files_computer_vision/team_1_player_statistics{output_suffix}.csv', index=True)
+        team_2_df.to_csv(f'output_files_computer_vision/team_2_player_statistics{output_suffix}.csv', index=True)
+        final_df.to_csv(f'output_files_computer_vision/teams_final_statistics{output_suffix}.csv', index=True)
 
     """
-
-
-
-
-    
                                   End of computer vision part
-
                                   Start of recommendation systems part
-
-
-
-
-
     """
-    # Load the teams data (you may need to adjust file paths)
+    
+    # Load the teams data
     teams1 = pd.read_csv('output_files_computer_vision/teams_final_statistics_video_1.csv')
     teams2 = pd.read_csv('output_files_computer_vision/teams_final_statistics_video_2.csv')
 
@@ -317,54 +302,42 @@ def main():
     recommended_formations = model1.find_winning_rows(similar_rows)
     recommended_formations.to_csv('output_files_recommendation_systems/recommended_formations.csv', index=False)
 
-
     # Select the first match data row
     match_data = recommended_formations
-    i = 0
-    solution = False
-    while i < 10 and not solution:
-        input_row = match_data.iloc[i].to_dict()
-        input_row['tackles_success'] = input_row.pop('tackle_success')
+    input_row = match_data.iloc[0].to_dict()
+    input_row['tackles_success'] = input_row.pop('tackle_success')
 
-        # Initialize the second model to recommend a team based on input row and processed player data
-        team_recommender = SecondModel(input_row, player_data)
-        selected_players, team_stats = team_recommender.recommend_team()
+    # Initialize the second model to recommend a team based on input row and processed player data
+    team_recommender = SecondModel(input_row, player_data)
+    selected_players, team_stats = team_recommender.recommend_team()
 
-        # If a team was successfully selected, display the results
-        if selected_players is not None:
-            solution = True
-            selected_players['status'] = 'Starting 11'  # Add a column to indicate starting players
+    # If a team was successfully selected, display the results
+    if selected_players is not None:
+        selected_players['status'] = 'Starting 11'  # Add a column to indicate starting players
 
-            # Remove the selected players and recommend substitutes
-            player_shirt_number_to_remove = selected_players['shirt_number'].tolist()
-            player_data_updated = player_data[~player_data['shirt_number'].isin(player_shirt_number_to_remove)]
+        # Remove the selected players and recommend substitutes
+        player_shirt_number_to_remove = selected_players['shirt_number'].tolist()
+        player_data_updated = player_data[~player_data['shirt_number'].isin(player_shirt_number_to_remove)]
 
-            substitute_recommender = SecondModel(input_row, player_data_updated)
-            selected_substitutes, team_stats = substitute_recommender.recommend_team()
+        substitute_recommender = SecondModel(input_row, player_data_updated)
+        selected_substitutes, team_stats = substitute_recommender.recommend_team()
 
-            # If substitutes were successfully selected, display the results
-            if selected_substitutes is not None:
-                selected_substitutes['status'] = 'Substitute'  # Add a column to indicate substitutes
+        # If substitutes were successfully selected, display the results
+        if selected_substitutes is not None:
+            selected_substitutes['status'] = 'Substitute'  # Add a column to indicate substitutes
 
-                # Combine both selected players and substitutes into a single file
-                combined_team = pd.concat([selected_players, selected_substitutes], ignore_index=True)
-                combined_team.to_csv('output_files_recommendation_systems/combined_team.csv', index=False)
+            # Combine both selected players and substitutes into a single file
+            combined_team = pd.concat([selected_players, selected_substitutes], ignore_index=True)
+            combined_team.to_csv('output_files_recommendation_systems/combined_team.csv', index=False)
         
-            else:
-                selected_players.to_csv('output_files_recommendation_systems/combined_team.csv', index=False)
-        i += 1
+        else:
+            selected_players.to_csv('output_files_recommendation_systems/combined_team.csv', index=False)
+
     """
-
-
-
-
                                   End of recommendation systems part
                                   Start of LLM part
-
-
-
-
     """
+
     # Set the environment variable in the current notebook session
     os.environ["GEMINI_API_KEY"] = "AIzaSyBv4nX97Do78jNAM0Kl5_DFE96qWsBfgbM"
 
@@ -381,10 +354,10 @@ def main():
     my_team_players_str = my_team_players.to_string(index=False)
 
     best_formations = pd.read_csv(r'output_files_recommendation_systems/recommended_formations.csv')
-    best_formations_str = best_formations.to_string(index = False)
+    best_formations_str = best_formations.to_string(index=False)
 
     match_players_recommendations = pd.read_csv(r'output_files_recommendation_systems/combined_team.csv')
-    match_players_recommendations_str = match_players_recommendations.to_string(index = False)
+    match_players_recommendations_str = match_players_recommendations.to_string(index=False)
 
     # Configure the Gemini API key
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
@@ -396,8 +369,10 @@ def main():
     if match_summary_json:
         print("Match Summary Result:")
         print(json.dumps(match_summary_json, indent=4))
+        json_outputs["match_summary"] = match_summary_json
     else:
         print("Failed to retrieve valid JSON for match summary.")
+        json_outputs["match_summary"] = "Failed to retrieve valid JSON for match summary."
 
     # Generate the suggestions prompt
     recommendation_prompt = generate_player_suggestions_prompt(best_formations_str, match_players_recommendations_str)
@@ -406,8 +381,10 @@ def main():
     if recommendation_json:
         print("Recommendation Result:")
         print(json.dumps(recommendation_json, indent=4))
+        json_outputs["recommendations"] = recommendation_json
     else:
         print("Failed to retrieve valid JSON for recommendations.")
+        json_outputs["recommendations"] = "Failed to retrieve valid JSON for recommendations."
 
     # Generate the opponent analysis prompt
     opponent_analysis_prompt = generate_opponent_analysis_prompt(opponent_info_str, opponent_players_str)
@@ -416,8 +393,10 @@ def main():
     if opponent_analysis_json:
         print("Opponent Analysis Result:")
         print(json.dumps(opponent_analysis_json, indent=4))
+        json_outputs["opponent_analysis"] = opponent_analysis_json
     else:
         print("Failed to retrieve valid JSON for opponent analysis.")
+        json_outputs["opponent_analysis"] = "Failed to retrieve valid JSON for opponent analysis."
 
     # Generate the training suggestions prompt
     training_suggestions_prompt = generate_training_suggestions_prompt(my_team_players_str, my_team_info_str, opponent_analysis_json)
@@ -429,11 +408,34 @@ def main():
             "team_training_session": training_suggestions_json.get("team_training_session", ""),
             "worst_5_players_individual_sessions": training_suggestions_json.get("individual_sessions", {})[:4] 
         }
-
         print("Training Suggestions Result:")
         print(json.dumps(output, indent=4))
+        json_outputs["training_suggestions"] = output
     else:
         print("Failed to retrieve valid JSON for training suggestions.")
+        json_outputs["training_suggestions"] = "Failed to retrieve valid JSON for training suggestions."
 
-#if __name__ == '__main__':
-#    main()
+    # Return the final JSON outputs
+    return json_outputs
+
+@app.post("/process_videos")
+def upload_video_paths(video_data: VideoPaths):
+    video_paths = video_data.video_paths
+    
+    if len(video_paths) != 2:
+        raise HTTPException(status_code=400, detail="Please provide exactly 2 video paths.")
+    
+    # Process the videos (this will call the process_videos function)
+    output = process_videos(video_paths)
+    
+    return {"message": "Videos are being processed", "video_paths": video_paths}
+
+@app.get("/get_json_outputs")
+def get_json_outputs():
+    if not json_outputs:
+        raise HTTPException(status_code=404, detail="No JSON outputs available yet. Videos might still be processing.")
+    
+    return json_outputs
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
