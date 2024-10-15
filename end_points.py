@@ -438,4 +438,4 @@ def get_json_outputs():
     return json_outputs
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000, reload=True)
+    uvicorn.run("end_points:app", host="0.0.0.0", port=8000, reload=True)
