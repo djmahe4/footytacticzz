@@ -1,4 +1,6 @@
 Python 3.x
+fastapi
+uvicorn
 pulp
 google-generativeai
 ultrallytics

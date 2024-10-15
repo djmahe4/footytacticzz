@@ -3,8 +3,6 @@ from pydantic import BaseModel
 import pandas as pd
 import cv2
 import gc
-import os
-import google.generativeai as genai
 import json
 import time
 

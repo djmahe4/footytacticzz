@@ -18,7 +18,7 @@ from team_stats import SoccerMatchDataProcessorFullWithSubs
 from recommendation_systems import MyPlayerStats, FirstModel, SecondModel
 from utils import clean_team_color, find_closest_player_dataset, find_closest_match
 from utils import send_to_gemini_api_with_retry
-from generate_prompt import generate_match_summary_prompt, generate_opponent_analysis_prompt, generate_training_suggestions_prompt
+from generate_prompt import generate_match_summary_prompt,generate_player_suggestions_prompt, generate_opponent_analysis_prompt, generate_training_suggestions_prompt
 
 install_requirements('requirements.txt')
 
@@ -381,10 +381,16 @@ def main():
     my_team_players = pd.read_csv(r'output_files_recommendation_systems/closest_player_data_mobile1.csv')
     my_team_players_str = my_team_players.to_string(index=False)
 
+    best_formations = pd.read_csv(r'/kaggle/working/recommended_formations.csv')
+    best_formations_str = best_formations.to_string(index = False)
+
+    match_players_recommendations = pd.read_csv(r'/kaggle/working/combined_team.csv')
+    match_players_recommendations_str = match_players_recommendations.to_string(index = False)
+
     # Configure the Gemini API key
     genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 
-        # Generate the match summary prompt
+    # Generate the match summary prompt
     match_summary_prompt = generate_match_summary_prompt(my_team_info_str, opponent_info_str)
     match_summary_json = send_to_gemini_api_with_retry(match_summary_prompt)
 
@@ -393,6 +399,16 @@ def main():
         print(json.dumps(match_summary_json, indent=4))
     else:
         print("Failed to retrieve valid JSON for match summary.")
+
+    # Generate the suggestions prompt
+    recommendation_prompt = generate_player_suggestions_prompt(best_formations_str, match_players_recommendations_str)
+    recommendation_json = send_to_gemini_api_with_retry(recommendation_prompt)
+
+    if recommendation_json:
+        print("Recommendation Result:")
+        print(json.dumps(recommendation_json, indent=4))
+    else:
+        print("Failed to retrieve valid JSON for recommendations.")
 
     # Generate the opponent analysis prompt
     opponent_analysis_prompt = generate_opponent_analysis_prompt(opponent_info_str, opponent_players_str)

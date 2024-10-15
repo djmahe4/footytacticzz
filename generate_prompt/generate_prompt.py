@@ -67,6 +67,61 @@ def generate_match_summary_prompt(my_team_info_str, opponent_info_str):
 
 
 
+def generate_player_suggestions_prompt(best_formations_str, match_players_recommendations_str):
+    """
+    Generates a player suggestions prompt based on recommendations data provided as strings.
+    
+    Args:
+        best_formations_str (str): String containing my team performance data.
+        match_players_recommendations_str (str): String containing opponent performance data.
+        
+    Returns:
+        str: The structured player_suggestions_prompt formatted as JSON.
+    """
+
+    prompt = f"""
+    ### Player suggestions Request
+
+    You are tasked with providing the best formation to play with, which is the first one in the provided data, and also player suggestions
+    for the match based on the provided statistics. Use the following information to derive insights.
+
+    **Best Formations:**
+    {best_formations_str}
+
+    **Player Suggestions:**
+    {match_players_recommendations_str}
+
+    ### Output Format:
+    Return your response as a JSON object with the following structure:
+
+    {{
+      "recommendations_output": {{
+        "best_formation": {{
+            "formation": "<Extract the first formation from best_formation_str>"
+        }},
+        "players_recommendations": [
+            {{
+                "number": "<Extract the player shirt number from match_players_recommendations_str>",
+                "position": "<Extract the position from match_players_recommendations_str>",
+                "status": "<Extract the status from match_players_recommendations_str>"
+            }},
+            {{
+                "number": "<Extract the next player shirt number>",
+                "position": "<Extract the next player's position>",
+                "status": "<Extract the next player's status>"
+            }}
+            // Repeat for all players in match_players_recommendations_str
+        ]
+      }}
+    }}
+
+    Your response should be structured as specified in the output format.
+    """
+
+    return prompt
+
+
+
 
 def generate_opponent_analysis_prompt(opponent_info_str, opponent_players_str):
     """
