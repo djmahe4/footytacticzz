@@ -2,8 +2,6 @@ import pandas as pd
 import json
 import time
 import google.generativeai as genai
-import sys
-sys.path.append('../')
 
 # Load the team data from CSV files
 def load_data(file_path):
