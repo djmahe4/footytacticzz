@@ -129,7 +129,7 @@ class FirstModel:
         lost_games = self.data_cleaned[self.data_cleaned['lose'] == 1]
         lost_games = self.split_formation(lost_games)
 
-        input_row = self.teams.iloc[0].to_dict()
+        input_row = self.teams.iloc[1].to_dict()
         input_df = pd.DataFrame([input_row])
         input_df = self.split_formation(input_df)
         filtered_lost_games = lost_games[self.features_to_compare]
@@ -149,7 +149,7 @@ class FirstModel:
 
         games = self.split_formation(games)
 
-        input_row = self.teams.iloc[1].to_dict()
+        input_row = self.teams.iloc[0].to_dict()
         input_df = pd.DataFrame([input_row])
         input_df = self.split_formation(input_df)
 
