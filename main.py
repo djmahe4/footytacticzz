@@ -435,10 +435,5 @@ def main():
     else:
         print("Failed to retrieve valid JSON for training suggestions.")
 
-<<<<<<< HEAD
 #if __name__ == '__main__':
 #    main()
-=======
-if __name__ == '__main__':
-    main()
->>>>>>> 8a023b0810c773e9461a825c96f609896ed296a5
