@@ -321,34 +321,39 @@ def main():
 
     # Select the first match data row
     match_data = recommended_formations
-    input_row = match_data.iloc[0].to_dict()
-    input_row['tackles_success'] = input_row.pop('tackle_success')
+    i = 0
+    solution = False
+    while i < 10 and not solution:
+        input_row = match_data.iloc[i].to_dict()
+        input_row['tackles_success'] = input_row.pop('tackle_success')
 
-    # Initialize the second model to recommend a team based on input row and processed player data
-    team_recommender = SecondModel(input_row, player_data)
-    selected_players, team_stats = team_recommender.recommend_team()
+        # Initialize the second model to recommend a team based on input row and processed player data
+        team_recommender = SecondModel(input_row, player_data)
+        selected_players, team_stats = team_recommender.recommend_team()
 
-    # If a team was successfully selected, display the results
-    if selected_players is not None:
-        selected_players['status'] = 'Starting 11'  # Add a column to indicate starting players
+        # If a team was successfully selected, display the results
+        if selected_players is not None:
+            solution = True
+            selected_players['status'] = 'Starting 11'  # Add a column to indicate starting players
 
-        # Remove the selected players and recommend substitutes
-        player_shirt_number_to_remove = selected_players['shirt_number'].tolist()
-        player_data_updated = player_data[~player_data['shirt_number'].isin(player_shirt_number_to_remove)]
+            # Remove the selected players and recommend substitutes
+            player_shirt_number_to_remove = selected_players['shirt_number'].tolist()
+            player_data_updated = player_data[~player_data['shirt_number'].isin(player_shirt_number_to_remove)]
 
-        substitute_recommender = SecondModel(input_row, player_data_updated)
-        selected_substitutes, team_stats = substitute_recommender.recommend_team()
+            substitute_recommender = SecondModel(input_row, player_data_updated)
+            selected_substitutes, team_stats = substitute_recommender.recommend_team()
 
-        # If substitutes were successfully selected, display the results
-        if selected_substitutes is not None:
-            selected_substitutes['status'] = 'Substitute'  # Add a column to indicate substitutes
+            # If substitutes were successfully selected, display the results
+            if selected_substitutes is not None:
+                selected_substitutes['status'] = 'Substitute'  # Add a column to indicate substitutes
 
-            # Combine both selected players and substitutes into a single file
-            combined_team = pd.concat([selected_players, selected_substitutes], ignore_index=True)
-            combined_team.to_csv('output_files_recommendation_systems/combined_team.csv', index=False)
+                # Combine both selected players and substitutes into a single file
+                combined_team = pd.concat([selected_players, selected_substitutes], ignore_index=True)
+                combined_team.to_csv('output_files_recommendation_systems/combined_team.csv', index=False)
         
-        else:
-            selected_players.to_csv('output_files_recommendation_systems/selected_players.csv', index=False)
+            else:
+                selected_players.to_csv('output_files_recommendation_systems/selected_players.csv', index=False)
+        i += 1
     """
 
 
