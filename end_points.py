@@ -47,7 +47,7 @@ def process_videos(video_paths):
     # Clear previous outputs
     json_outputs = {}
     
-    install_requirements('requirements.txt')  # Ensure dependencies are installed
+    # install_requirements('requirements.txt')  # Ensure dependencies are installed
 
     # Loop through each video path
     for video_index, video_path in enumerate(video_paths):
