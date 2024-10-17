@@ -35,6 +35,7 @@ class CameraMovementEstimator():
                     camera_movement = camera_movement_per_frame[frame_num]
                     position_adjusted = (position[0] - camera_movement[0], position[1] - camera_movement[1])
                     tracks[object][frame_num][track_id]['position_adjusted'] = position_adjusted
+                    print("adjusted")
                     print(tracks[object][frame_num][track_id]['position_adjusted'])
 
     def get_camera_movement(self, frames):

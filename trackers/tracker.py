@@ -20,6 +20,7 @@ class Tracker:
                     else:
                         position = get_foot_position(bbox)
                     tracks[object][frame_num][track_id]['position'] = position
+                    print("position")
                     print(tracks[object][frame_num][track_id]['position'])
 
     def interpolate_ball_positions(self, ball_positions):
