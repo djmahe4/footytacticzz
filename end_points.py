@@ -122,7 +122,7 @@ def process_videos(video_paths):
                         df.at[player_id, 'team_color'] = str(team_assigner.team_colors[team])
                     else:
                         df.loc[player_id] = {'team': team, 'team_color': str(team_assigner.team_colors[team])}
-
+            print(df.columns)
             # Ball Assignment
             player_assigner = PlayerBallAssigner()
             for frame_num, player_track in enumerate(tracks['players']):
@@ -134,7 +134,7 @@ def process_videos(video_paths):
 
                         if assigned_player != -1:
                             tracks['players'][frame_num][assigned_player]['has_ball'] = True
-
+            print(df.columns)
             # Pass Detection
             pass_detector = PassDetector(tracks, df)
             df = pass_detector.process_game_in_batches(batch_size=20)
@@ -143,11 +143,11 @@ def process_videos(video_paths):
             class_thresholds = {0: 0.8, 1: 0.7, 2: 0.3, 3: 0.1, 4: 0.7, 5: 0.6, 6: 0.85}
             yolo_processor = YOLOVideoProcessor('models/new_data.pt', class_thresholds)
             filtered_detections, detections_classes_2_and_3 = yolo_processor.process_frames_combined(video_frames)
-            
+            print(df.columns)
             # Detect other events
             event_processor = EventProcessor(tracks, filtered_detections, df)
             df = event_processor.process_frames_in_batches()
-
+            print(df.columns)
             # Process Goal and Line Points
             processor = GoalAndLineProcessor()
             goals_and_lines_annotations = processor.get_goal_and_line_data(video_frames, detections_classes_2_and_3)
@@ -155,11 +155,11 @@ def process_videos(video_paths):
             # Detect shots, corners, saves, goals
             shot_detector = ShotDetector(tracks, df, team_df, goals_and_lines_annotations)
             df, team_df = shot_detector.process_frames_in_batches()
-
-            # Initialize OCR
+            print(df.columns)
+            # Initialize number object detector
             player_number_tracker = PlayerShirtNumberTracker(video_frames, tracks, df, 'models/playershirt.pt')
             df = player_number_tracker.run()
-
+            print(df.columns)
             # Initialize FormationDetector
             formation_detector = FormationDetector(tracks, possible_formations, team_df)
             team_df = formation_detector.process_frames_in_batches()
@@ -177,7 +177,7 @@ def process_videos(video_paths):
 
         # Fill in missing data
         df = df.fillna(0)
-
+        print(df.columns)
         # Final statistics processing
         player_stats = PlayerStats(df)
         team_1_df, team_2_df = player_stats.process_data()
