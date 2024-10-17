@@ -2,6 +2,7 @@ Python 3.x
 fastapi
 uvicorn
 pulp
+flask
 google-generativeai
 ultrallytics
 supervision
