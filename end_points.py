@@ -30,9 +30,15 @@ from recommendation_systems import MyPlayerStats, FirstModel, SecondModel
 from utils import clean_team_color, find_closest_player_dataset, find_closest_match
 from utils import send_to_gemini_api_with_retry
 from generate_prompt import generate_match_summary_prompt, generate_player_suggestions_prompt, generate_opponent_analysis_prompt, generate_training_suggestions_prompt
-
+install_requirements('requirements.txt')
 # Initialize the FastAPI app
 app = FastAPI()
+#exposing the server to public url
+from pyngrok import ngrok
+ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
+# Expose port 8000
+public_url = ngrok.connect(8000)
+print(f"Public URL: {public_url}")
 
 # Global variable to store video paths and JSON outputs
 json_outputs = {}
@@ -47,7 +53,7 @@ def process_videos(video_paths):
     # Clear previous outputs
     json_outputs = {}
     
-    # install_requirements('requirements.txt')  # Ensure dependencies are installed
+      # Ensure dependencies are installed
 
     # Loop through each video path
     for video_index, video_path in enumerate(video_paths):
