@@ -43,6 +43,8 @@ class ViewTransformer():
                         position_trasnformed = self.transform_point(position)
                         if position_trasnformed is not None:
                             position_trasnformed = position_trasnformed.squeeze().tolist()
-                        tracks[object][frame_num][track_id]['position_transformed'] = position_trasnformed
+                            tracks[object][frame_num][track_id]['position_transformed'] = position_trasnformed
+                        else: 
+                            tracks[object][frame_num][track_id]['position_transformed'] = tracks[object][frame_num][track_id]['position_adjusted']
                         print("transformed")
                         print(tracks[object][frame_num][track_id]['position_transformed'])
