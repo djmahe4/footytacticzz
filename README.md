@@ -1,7 +1,25 @@
 # Football Analysis Project
 
 ## Introduction
-The goal of this project is to detect and track players, referees, and footballs in a video using YOLO, one of the best AI object detection models available. We will also train the model to improve its performance. Additionally, we will assign players to teams based on the colors of their t-shirts using Kmeans for pixel segmentation and clustering. With this information, we can measure a team's ball acquisition percentage in a match. We will also use optical flow to measure camera movement between frames, enabling us to accurately measure a player's movement. Furthermore, we will implement perspective transformation to represent the scene's depth and perspective, allowing us to measure a player's movement in meters rather than pixels. Finally, we will calculate a player's speed and the distance covered. This project covers various concepts and addresses real-world problems, making it suitable for both beginners and experienced machine learning engineers.
+The goal of this project is to create a Match analysis & Coach assistant app to help in preparing for every match based on last matches' videos for your team and for the opponent team, the app consists of 3 main parts:
+- Models & modules: this part holds the computer vision, feature extraction and match analysis part.
+- Recommendation systems: this part holds the formation, play style, starting 11 and bench players recommendation systems.
+- LLM integration: this part holds the integration with Gemini LLM model to create a human readable opponent weakness analysis, training plan and match summary based on the data from the previous parts in addition to a chatbot to add the ability of interaction and modifying to coaches.
+
+## Contributors ✨
+
+This project is available thanks to these amazing people who contributed to it:
+
+| [<img src="https://avatars.githubusercontent.com/u/109768834?v=4" width="100px;"/><br /><sub><b>Abdelrahman Atef</b></sub>](https://github.com/AbdelrahmanAtef01) | [<https://avatars.githubusercontent.com/u/79551355?v=4" width="100px;"/><br /><sub><b>Ziad Hassan</b></sub>](https://github.com/ziad640) | [<img src="https://avatars.githubusercontent.com/u/96237323?v=4" width="100px;"/><br /><sub><b>Ahmed Ibrahim</b></sub>](https://github.com/AhmedIbrahemAhmed) | [<img src="https://avatars.githubusercontent.com/u/119015507?v=4" width="100px;"/><br /><sub><b>Abdelrahman Alaa</b></sub>](https://github.com/NA70X) | [<img src="https://avatars.githubusercontent.com/u/136976977?v=4" width="100px;"/><br /><sub><b>Abdelrahman Mohamed</b></sub>](https://github.com/AbdooMohamedd) | [<img src="https://avatars.githubusercontent.com/u/98721410?v=4" width="100px;"/><br /><sub><b>Zid Sameh</b></sub>](https://github.com/Ziad-Sameh3) |
+| :---: | :---: | :---: |
+| Computer vision & modules | Computer vision & modules | Recommendation Systems | Recommendation Systems | LLM Integration | LLM Integration |
+
+## Table of Contents
+- [Installation](#installation)
+- [Usage](#usage)
+- [Features](#features)
+- [Contributing](#contributing)
+- [License](#license)
 
 ![Screenshot](output_videos/screenshot.png)
 
