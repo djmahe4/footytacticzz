@@ -225,51 +225,51 @@ def process_videos(video_paths):
     }
 
     # Extract the first team's color from mobile_data1
- def find_closest_player_dataset(player_data, target_color):
-    non_goalkeeper_data = player_data[player_data['position'] != 'goalkeeper']  # Exclude goalkeepers
-    player_colors = non_goalkeeper_data['team_color'].apply(clean_color_string)
-    distances = np.array([euclidean_distance(target_color, player_color) for player_color in player_colors])
+    def find_closest_player_dataset(player_data, target_color):
+        non_goalkeeper_data = player_data[player_data['position'] != 'goalkeeper']  # Exclude goalkeepers
+        player_colors = non_goalkeeper_data['team_color'].apply(clean_color_string)
+        distances = np.array([euclidean_distance(target_color, player_color) for player_color in player_colors])
 
-    if len(distances) > 0:
-        closest_distance = np.min(distances)
-    else:
-        closest_distance = np.inf  # Handle case when no players are available
+        if len(distances) > 0:
+            closest_distance = np.min(distances)
+        else:
+            closest_distance = np.inf  # Handle case when no players are available
 
-    return closest_distance
+        return closest_distance
 
-# Get the closest player dataset based on color
-def get_closest_player_data(mobile_color, threshold=10):
-    distances = {}
+    # Get the closest player dataset based on color
+    def get_closest_player_data(mobile_color, threshold=10):
+        distances = {}
 
-    distances['player_data1'] = find_closest_player_dataset(player_data1, mobile_color)
-    distances['player_data2'] = find_closest_player_dataset(player_data2, mobile_color)
-    distances['player_data3'] = find_closest_player_dataset(player_data3, mobile_color)
-    distances['player_data4'] = find_closest_player_dataset(player_data4, mobile_color)
+        distances['player_data1'] = find_closest_player_dataset(player_data1, mobile_color)
+        distances['player_data2'] = find_closest_player_dataset(player_data2, mobile_color)
+        distances['player_data3'] = find_closest_player_dataset(player_data3, mobile_color)
+        distances['player_data4'] = find_closest_player_dataset(player_data4, mobile_color)
 
-    # Get the closest player data with minimum distance
-    closest_player_dataset = min(distances, key=distances.get)
+        # Get the closest player data with minimum distance
+        closest_player_dataset = min(distances, key=distances.get)
 
-    return closest_player_dataset
+        return closest_player_dataset
 
-# Find closest player datasets for mobile_data1
-closest_player_data_first_team = get_closest_player_data(first_team_color)
-closest_player_data_first_team = player_data_dict[closest_player_data_first_team]
+    # Find closest player datasets for mobile_data1
+    closest_player_data_first_team = get_closest_player_data(first_team_color)
+    closest_player_data_first_team = player_data_dict[closest_player_data_first_team]
 
-# Output the final closest player datasets
-
-
-position_mapping = dict(zip(mobile_data1['Shirt_Number'], mobile_data1['Position']))
-
-# Update positions in closest_player_data_first_team based on the mapping
-for index, player in closest_player_data_first_team.iterrows():
-    shirt_number = player['shirtNumber']
-
-    # Check if the shirt number exists in the mapping
-    if shirt_number in position_mapping:
-        closest_player_data_first_team.at[index, 'position'] = position_mapping[shirt_number]
+    # Output the final closest player datasets
 
 
-player_data = closest_player_data_first_team
+    position_mapping = dict(zip(mobile_data1['Shirt_Number'], mobile_data1['Position']))
+
+    # Update positions in closest_player_data_first_team based on the mapping
+    for index, player in closest_player_data_first_team.iterrows():
+        shirt_number = player['shirtNumber']
+
+        # Check if the shirt number exists in the mapping
+        if shirt_number in position_mapping:
+            closest_player_data_first_team.at[index, 'position'] = position_mapping[shirt_number]
+
+
+    player_data = closest_player_data_first_team
 
 
     # From here on, use only closest_player_data_mobile1 in the rest of the code
