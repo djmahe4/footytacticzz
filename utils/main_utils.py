@@ -7,7 +7,6 @@ import cv2
 def save_tracks_to_csv(tracks, csv_path='output_tracks.csv'):
     """
     Save the tracking data to a CSV file.
-
     :param tracks: Dictionary containing the tracks for players, referees, ball, and goalkeepers
     :param csv_path: The file path for the output CSV
     """
@@ -15,21 +14,17 @@ def save_tracks_to_csv(tracks, csv_path='output_tracks.csv'):
         writer = csv.writer(file)
         # Write the CSV header
         writer.writerow(['Frame Number', 'Class Label', 'Track ID', 'Bounding Box (x1, y1, x2, y2)'])
-
         # Iterate over the tracks for each frame and write to CSV
         for frame_num, (players, referees, ball, goalkeepers) in enumerate(
-                zip(tracks['players'], tracks['referees'], tracks['ball'], tracks['goalkeepers'])):
-
+            zip(tracks['players'], tracks['referees'], tracks['ball'], tracks['goalkeepers'])):
             # Write player tracks
             for track_id, track_info in players.items():
                 bbox = track_info['bbox']
                 writer.writerow([frame_num, 'player', track_id, bbox])
-
             # Write referee tracks
             for track_id, track_info in referees.items():
                 bbox = track_info['bbox']
                 writer.writerow([frame_num, 'referee', track_id, bbox])
-
             # Write ball tracks
             for track_id, track_info in ball.items():
                 bbox = track_info['bbox']

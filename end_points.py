@@ -11,8 +11,10 @@ import google.generativeai as genai
 import uvicorn
 import cv2
 import gc
+import requests
+import gdown
 from pyngrok import ngrok
-
+import numpy as np
 # Import your modules here
 from utils import initialize_dataframe, initialize_team_df, read_video_in_batches, save_tracks_to_csv 
 from trackers import Tracker
@@ -47,8 +49,18 @@ json_outputs = {}
 class VideoPaths(BaseModel):
     video_paths: list[str]
 
+def download_video(url, save_path):
+    try:
+        # Download the video using gdown
+        gdown.download(url, save_path, quiet=False)
+        print(f"Downloaded video to {save_path}")
+        return True
+    except Exception as e:
+        print(f"Failed to download video from {url}: {e}")
+        return False
+
 # Define the process_videos function that contains your detailed processing logic
-def process_videos(video_paths):
+def process_videos(video_urls):
     global json_outputs
     # Clear previous outputs
     json_outputs = {}
@@ -56,19 +68,29 @@ def process_videos(video_paths):
       # Ensure dependencies are installed
 
     # Loop through each video path
-    for video_index, video_path in enumerate(video_paths):
+    os.makedirs('videos', exist_ok=True)
+
+    for video_index, video_url in enumerate(video_urls):
         df = initialize_dataframe()  # Initialize DataFrame for players
         team_df = initialize_team_df()  # Initialize DataFrame for teams
         tracker = Tracker('models/old_data.pt')  # Initialize tracker
         team_assigner = TeamAssigner()
+
+        # Download the video to 'videos' folder
+        video_filename = f"videos/video_{video_index}.mp4"
+        print(f"Downloading video from {video_url}...")
+        download_video(video_url, video_filename)
+
+        # Open the local video file using OpenCV
         
         # Set batch size
         batch_size = 200
-        video_reader = cv2.VideoCapture(video_path)
+        video_reader = cv2.VideoCapture(video_filename)
 
         # Get total number of frames in the video
         total_frames = int(video_reader.get(cv2.CAP_PROP_FRAME_COUNT))
-
+        print("total_frames: ")
+        print(total_frames)
         # Define possible formations
         possible_formations = ['4-3-3', '4-2-3-1', '4-3-2-1', '4-1-4-1', '3-5-2', '3-4-1-2', 
                                '4-4-2', '4-4-1-1', '5-4-1', '3-4-3', '4-1-2-1-2', '3-1-4-2', 
@@ -178,16 +200,17 @@ def process_videos(video_paths):
         # Fill in missing data
         df = df.fillna(0)
         print(df.columns)
+        print(len(df))
         # Final statistics processing
         player_stats = PlayerStats(df)
         team_1_df, team_2_df = player_stats.process_data()
-
+        print(len(team_1_df))
+        print(len(team_2_df))
         processor = SoccerMatchDataProcessorFullWithSubs(team_1_df, team_2_df, team_df)
         final_df = processor.process_match_data()
 
         # Save CSVs
         output_suffix = f"_video_{video_index + 1}"
-        save_tracks_to_csv(tracks, csv_path=f'output_files_computer_vision/tracks_csv{output_suffix}.csv')
         df.to_csv(f'output_files_computer_vision/player_statistics{output_suffix}.csv', index=True)
         team_df.to_csv(f'output_files_computer_vision/team_statistics{output_suffix}.csv', index=True)
         team_1_df.to_csv(f'output_files_computer_vision/team_1_player_statistics{output_suffix}.csv', index=True)
@@ -224,58 +247,69 @@ def process_videos(video_paths):
         'player_data3': player_data3,
         'player_data4': player_data4,
     }
+    def euclidean_distance(color1, color2):
+      return np.sqrt(np.sum((color1 - color2) ** 2))
+    def clean_color_string(color_string):
+      color_list = color_string.strip("[]").split()  # Split on spaces
+      return np.array(color_list, dtype=float)
+# Extract the first team's color from mobile_data1
+    first_team_color = np.array(mobile_data1.iloc[0]['Team_Color '].strip("[]").split(","), dtype=float)
 
+# Extract the opponent's team color from mobile_data2
+    opponent_team_color = np.array(mobile_data2.iloc[0]['Team_Color '].strip("[]").split(","), dtype=float)
     # Extract the first team's color from mobile_data1
-    first_team_color_mobile1 = clean_team_color(mobile_data1.iloc[0]['Team_Color '])
+    def find_closest_player_dataset(player_data, target_color):
+      non_goalkeeper_data = player_data[player_data['position'] != 'goalkeeper']  # Exclude goalkeepers
+      player_colors = non_goalkeeper_data['team_color'].apply(clean_color_string)
+      distances = np.array([euclidean_distance(target_color, player_color) for player_color in player_colors])
 
-    # Extract the opponent's team color from mobile_data2
-    first_team_color_mobile2 = clean_team_color(mobile_data2.iloc[0]['Team_Color '])
+      if len(distances) > 0:
+        closest_distance = np.min(distances)
+      else:
+        closest_distance = np.inf  # Handle case when no players are available
 
-    # Handle player data 1 and 2 based on mobile_data1
-    closest_player_data_1_2 = []
-    for player_data_key in ['player_data1', 'player_data2']:
-        closest_player_dataset_key = find_closest_player_dataset(player_data_dict[player_data_key], first_team_color_mobile1, player_data_key)
-        if closest_player_dataset_key:
-            closest_player_data_1_2.append(player_data_dict[closest_player_dataset_key])
+      return closest_distance
 
-    # Combine the closest data for player 1 and 2 based on mobile_data1
-    closest_player_data_mobile1 = pd.concat(closest_player_data_1_2, ignore_index=True)
+# Get the closest player dataset based on color
+    def get_closest_player_data(mobile_color, threshold=10):
+      distances = {}
 
-    # Process the player stats
-    player_stats = MyPlayerStats(closest_player_data_mobile1, correct_shirt_numbers, mobile_data1)
-    closest_player_data_mobile1 = player_stats.process_data()
+      distances['player_data1'] = find_closest_player_dataset(player_data1, mobile_color)
+      distances['player_data2'] = find_closest_player_dataset(player_data2, mobile_color)
+      distances['player_data3'] = find_closest_player_dataset(player_data3, mobile_color)
+      distances['player_data4'] = find_closest_player_dataset(player_data4, mobile_color)
 
-    # Correct the shirt numbers and drop the temporary column
-    closest_player_data_mobile1['shirt_number'] = closest_player_data_mobile1['corrected_shirt_number']
-    closest_player_data_mobile1.drop(columns=['corrected_shirt_number'], inplace=True)
+      # Get the closest player data with minimum distance
+      closest_player_dataset = min(distances, key=distances.get)
 
-    closest_player_data_mobile1.to_csv('output_files_recommendation_systems/closest_player_data_mobile1.csv', index=False)
+      return closest_player_dataset
 
-    # Handle player data 3 and 4 based on mobile_data2
-    closest_player_data_3_4 = []
-    for player_data_key in ['player_data3', 'player_data4']:
-        closest_player_dataset_key = find_closest_player_dataset(player_data_dict[player_data_key], first_team_color_mobile2, player_data_key)
-        if closest_player_dataset_key:
-            closest_player_data_3_4.append(player_data_dict[closest_player_dataset_key])
+    # Find closest player datasets for mobile_data1
+    closest_player_data_first_team = get_closest_player_data(first_team_color)
+    closest_player_data_first_team = player_data_dict[closest_player_data_first_team]
 
-    # Combine the closest data for player 3 and 4 based on mobile_data2
-    closest_player_data_mobile2 = pd.concat(closest_player_data_3_4, ignore_index=True)
+    # Output the final closest player datasets
 
-    # Process the player stats
-    player_stats = MyPlayerStats(closest_player_data_mobile2, correct_shirt_numbers2, mobile_data2)
-    closest_player_data_mobile2 = player_stats.process_data()
 
-    # Correct the shirt numbers and drop the temporary column
-    closest_player_data_mobile2['shirt_number'] = closest_player_data_mobile2['corrected_shirt_number']
-    closest_player_data_mobile2.drop(columns=['corrected_shirt_number'], inplace=True)
+    position_mapping = dict(zip(mobile_data1['Shirt_Number'], mobile_data1['Position']))
 
-    closest_player_data_mobile2.to_csv('output_files_recommendation_systems/closest_player_data_mobile2.csv', index=False)
+# Update positions in closest_player_data_first_team based on the mapping
+    for index, player in closest_player_data_first_team.iterrows():
+      shirt_number = player['shirtNumber']
+
+      # Check if the shirt number exists in the mapping
+      if shirt_number in position_mapping:
+        closest_player_data_first_team.at[index, 'position'] = position_mapping[shirt_number]
+
+
+    player_data = closest_player_data_first_team
+
 
     # From here on, use only closest_player_data_mobile1 in the rest of the code
 
     # Find the closest matching rows in teams
-    closest_row_team1 = find_closest_match(combined_teams, first_team_color_mobile1)
-    opponent_team_color = clean_team_color(mobile_data2.iloc[0]['Team_Color '])
+    closest_row_team1 = find_closest_match(combined_teams, first_team_color)
+    # opponent_team_color = clean_team_color(mobile_data2.iloc[0]['Team_Color '])
     closest_row_team2 = find_closest_match(combined_teams, opponent_team_color)
 
     combined_closest_rows = pd.DataFrame([closest_row_team1, closest_row_team2])
@@ -290,7 +324,6 @@ def process_videos(video_paths):
     data_cleaned = pd.read_csv('recommendation_systems_input_files/data_cleaned.csv')
 
     # Use the closest player data based on mobile data 1
-    player_data = closest_player_data_mobile1
 
     player_data['shirt_number'] = player_data.pop('Shirt_Number')
     player_data['pass_success'] = player_data.pop('%_pass_success')
@@ -310,15 +343,19 @@ def process_videos(video_paths):
 
     # Select the first match data row
     match_data = recommended_formations
-    input_row = match_data.iloc[0].to_dict()
-    input_row['tackles_success'] = input_row.pop('tackle_success')
 
-    # Initialize the second model to recommend a team based on input row and processed player data
-    team_recommender = SecondModel(input_row, player_data)
-    selected_players, team_stats = team_recommender.recommend_team()
+    i = 0
+    solution = False
+    while i < 10 and not solution:
+      input_row = match_data.iloc[0].to_dict()
+      input_row['tackles_success'] = input_row.pop('tackle_success')
 
-    # If a team was successfully selected, display the results
-    if selected_players is not None:
+      # Initialize the second model to recommend a team based on input row and processed player data
+      team_recommender = SecondModel(input_row, player_data)
+      selected_players, team_stats = team_recommender.recommend_team()
+
+      # If a team was successfully selected, display the results
+      if selected_players is not None:
         selected_players['status'] = 'Starting 11'  # Add a column to indicate starting players
 
         # Remove the selected players and recommend substitutes
@@ -338,6 +375,7 @@ def process_videos(video_paths):
         
         else:
             selected_players.to_csv('output_files_recommendation_systems/combined_team.csv', index=False)
+      i += 1
 
     """
                                   End of recommendation systems part
