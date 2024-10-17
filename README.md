@@ -10,12 +10,10 @@ The goal of this project is to create a Match analysis & Coach assistant app to 
 
 This project is available thanks to these amazing people who contributed to it:
 
-| [<img src="https://avatars.githubusercontent.com/u/109768834?v=4" width="100px;"/><br /><sub><b>Abdelrahman Atef</b></sub>](https://github.com/AbdelrahmanAtef01) - **Computer Vision & Modules** |
-| [<img src="https://avatars.githubusercontent.com/u/79551355?v=4" width="100px;"/><br /><sub><b>Ziad Hassan</b></sub>](https://github.com/ziad640) - **Computer Vision & Modules** |
-| [<img src="https://avatars.githubusercontent.com/u/96237323?v=4" width="100px;"/><br /><sub><b>Ahmed Ibrahim</b></sub>](https://github.com/AhmedIbrahemAhmed) - **Recommendation Systems** |
-| [<img src="https://avatars.githubusercontent.com/u/119015507?v=4" width="100px;"/><br /><sub><b>Abdelrahman Alaa</b></sub>](https://github.com/NA70X) - **Recommendation Systems** |
-| [<img src="https://avatars.githubusercontent.com/u/136976977?v=4" width="100px;"/><br /><sub><b>Abdelrahman Mohamed</b></sub>](https://github.com/AbdooMohamedd) - **LLM Integration** |
-| [<img src="https://avatars.githubusercontent.com/u/98721410?v=4" width="100px;"/><br /><sub><b>Ziad Sameh</b></sub>](https://github.com/Ziad-Sameh3) - **LLM Integration** |
+| [<img src="https://avatars.githubusercontent.com/u/109768834?v=4" width="100px;"/><br /><sub><b>[Abdelrahman Atef](https://github.com/AbdelrahmanAtef01)</b></sub><br />**Computer Vision & Modules**] | [<img src="https://avatars.githubusercontent.com/u/79551355?v=4" width="100px;"/><br /><sub><b>[Ziad Hassan](https://github.com/ziad640)</b></sub><br />**Computer Vision & Modules**] | [<img src="https://avatars.githubusercontent.com/u/96237323?v=4" width="100px;"/><br /><sub><b>[Ahmed Ibrahim](https://github.com/AhmedIbrahemAhmed)</b></sub><br />**Recommendation Systems**] |
+| :---: | :---: | :---: |
+| [<img src="https://avatars.githubusercontent.com/u/119015507?v=4" width="100px;"/><br /><sub><b>[Abdelrahman Alaa](https://github.com/NA70X)</b></sub><br />**Recommendation Systems**] | [<img src="https://avatars.githubusercontent.com/u/136976977?v=4" width="100px;"/><br /><sub><b>[Abdelrahman Mohamed](https://github.com/AbdooMohamedd)</b></sub><br />**LLM Integration**] | [<img src="https://avatars.githubusercontent.com/u/98721410?v=4" width="100px;"/><br /><sub><b>[Ziad Sameh](https://github.com/Ziad-Sameh3)</b></sub><br />**LLM Integration**] |
+
 
 
 ## Table of Contents
