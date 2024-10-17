@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# Create a directory named 'models' if it doesn't exist within the cloned repo
+mkdir -p models
 
 echo "Downloading models from Dropbox into the 'models' directory..."
 
