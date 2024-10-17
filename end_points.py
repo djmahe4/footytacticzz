@@ -131,13 +131,13 @@ def process_videos(video_urls):
             tracks = tracker.get_object_tracks(video_frames)  # Get object tracks for batch
             tracker.add_position_to_tracks(tracks)  # Add position to tracks
 
+            # Interpolate Ball Positions
+            tracks["ball"] = tracker.interpolate_ball_positions(tracks["ball"])
+
             # Camera movement estimator
             camera_movement_estimator = CameraMovementEstimator(video_frames[0])
             camera_movement_per_frame = camera_movement_estimator.get_camera_movement(video_frames)
             camera_movement_estimator.add_adjust_positions_to_tracks(tracks, camera_movement_per_frame)
-
-            # Interpolate Ball Positions
-            tracks["ball"] = tracker.interpolate_ball_positions(tracks["ball"])
 
             # View Transformer
             view_transformer = ViewTransformer()
