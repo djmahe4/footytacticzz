@@ -1,5 +1,5 @@
 from utils import install_requirements, download_models
-
+import os
 def requirements_installed():
     # Check if a requirements marker file exists (or use any package check mechanism)
     return os.path.exists('requirements_installed.flag')
@@ -23,7 +23,7 @@ if not models_downloaded():
     download_models()
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
-import os
+
 import pandas as pd
 import json
 import google.generativeai as genai
