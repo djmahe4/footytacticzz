@@ -1,7 +1,7 @@
-from utils import install_requirements
+from utils import install_requirements, download_models
 
 install_requirements('requirements.txt')
-
+download_models()
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import os
