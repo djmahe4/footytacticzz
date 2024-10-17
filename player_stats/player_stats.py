@@ -21,7 +21,8 @@ class PlayerStats:
     def process_data(self):
         # Step 1: Drop rows where shirt_number is 0
         self.input_df = self.input_df[self.input_df['shirt_number'] != 0]
-
+        self.input_df = self.input_df[self.input_df['team'] != 0]
+        
         # Step 2: Combine rows based on 'shirt_number' and 'team' by summing all columns
         grouped = self.input_df.groupby(['shirt_number', 'team']).agg({
             'Position': 'first',  # Assuming 'Position' does not change for the same 'shirt_number'
