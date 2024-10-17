@@ -114,3 +114,8 @@ def read_video_in_batches(video_reader, start_frame, batch_size):
 # Function to install libraries from a given requirements.txt file path
 def install_requirements(file_path):
     subprocess.check_call([sys.executable, "-m", "pip", "install", "-r", file_path])
+
+def download_models():
+    subprocess.run(["sed", "-i", "s/\r$//", "download_models.sh"])
+    # Run the bash script
+    subprocess.run(["bash", "download_models.sh"])
