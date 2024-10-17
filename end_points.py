@@ -7,6 +7,7 @@ import google.generativeai as genai
 import uvicorn
 import cv2
 import gc
+from pyngrok import ngrok
 
 # Import your modules here
 from utils import initialize_dataframe, initialize_team_df, read_video_in_batches, save_tracks_to_csv, install_requirements
@@ -33,6 +34,11 @@ from generate_prompt import generate_match_summary_prompt, generate_player_sugge
 
 # Initialize the FastAPI app
 app = FastAPI()
+#exposing the server to public url
+!ngrok authtoken 2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw
+# Expose port 8000
+public_url = ngrok.connect(8000)
+print(f"Public URL: {public_url}")
 
 # Global variable to store video paths and JSON outputs
 json_outputs = {}
