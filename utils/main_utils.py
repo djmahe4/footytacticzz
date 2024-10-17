@@ -62,7 +62,8 @@ def initialize_dataframe(tracks=None):
         "defensive_success", "Tackles_attempted", 
         "tackling_failure", "tackling_success", "Clearances", 
         "Interceptions", "injuries", "Distance_covered", 
-        "Avg_speed", "Highest_speed", "dribbled_past"
+        "Avg_speed", "Highest_speed", "dribbled_past",
+        "team", "team_color"
     ]
 
     # Check if tracks is provided
