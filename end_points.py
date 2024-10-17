@@ -1,3 +1,7 @@
+from utils import install_requirements
+
+install_requirements('requirements.txt')
+
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import os
@@ -7,9 +11,10 @@ import google.generativeai as genai
 import uvicorn
 import cv2
 import gc
+from pyngrok import ngrok
 
 # Import your modules here
-from utils import initialize_dataframe, initialize_team_df, read_video_in_batches, save_tracks_to_csv, install_requirements
+from utils import initialize_dataframe, initialize_team_df, read_video_in_batches, save_tracks_to_csv 
 from trackers import Tracker
 from team_assigner import TeamAssigner
 from camera_movement_estimator import CameraMovementEstimator
@@ -30,11 +35,9 @@ from recommendation_systems import MyPlayerStats, FirstModel, SecondModel
 from utils import clean_team_color, find_closest_player_dataset, find_closest_match
 from utils import send_to_gemini_api_with_retry
 from generate_prompt import generate_match_summary_prompt, generate_player_suggestions_prompt, generate_opponent_analysis_prompt, generate_training_suggestions_prompt
-install_requirements('requirements.txt')
 # Initialize the FastAPI app
 app = FastAPI()
 #exposing the server to public url
-from pyngrok import ngrok
 ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
 # Expose port 8000
 public_url = ngrok.connect(8000)
