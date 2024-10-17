@@ -9,7 +9,5 @@ opencv-python
 numpy
 pandas
 pytesseract
-csv
-sys
 scikit-learn
 pyngrok
