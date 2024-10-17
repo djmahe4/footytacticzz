@@ -38,10 +38,7 @@ from generate_prompt import generate_match_summary_prompt, generate_player_sugge
 # Initialize the FastAPI app
 app = FastAPI()
 #exposing the server to public url
-ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
-# Expose port 8000
-public_url = ngrok.connect(8000)
-print(f"Public URL: {public_url}")
+
 
 # Global variable to store video paths and JSON outputs
 json_outputs = {}
@@ -447,4 +444,8 @@ def get_json_outputs():
     return json_outputs
 
 if __name__ == "__main__":
+    ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
+    # Expose port 8000
+    public_url = ngrok.connect(8000)
+    print(f"Public URL: {public_url}")
     uvicorn.run("end_points:app", host="0.0.0.0", port=8000, reload=True)
