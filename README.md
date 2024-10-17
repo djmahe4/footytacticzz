@@ -29,6 +29,9 @@ This project is available thanks to these amazing people who contributed to it:
 - [AssociatedProjects](#AssociatedProjects)
 - [References](#References)
 
+## Installation
+to clone and use this repo you can either access it directly using the end points file, or you can use the main file but don't forget to install the requirements and it doesn't contain the chatbot
+
 ## ModulesUsed
 The following modules are used in this project:
 - ultraLytics Yolo v8x: computer vision object detection model
