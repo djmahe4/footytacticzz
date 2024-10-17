@@ -35,7 +35,7 @@ from generate_prompt import generate_match_summary_prompt, generate_player_sugge
 # Initialize the FastAPI app
 app = FastAPI()
 #exposing the server to public url
-!ngrok authtoken 2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw
+ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
 # Expose port 8000
 public_url = ngrok.connect(8000)
 print(f"Public URL: {public_url}")
