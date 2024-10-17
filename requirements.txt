@@ -12,4 +12,4 @@ pytesseract
 csv
 sys
 scikit-learn
-
+pyngrok
