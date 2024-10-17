@@ -7,7 +7,6 @@ import google.generativeai as genai
 import uvicorn
 import cv2
 import gc
-from pyngrok import ngrok
 
 # Import your modules here
 from utils import initialize_dataframe, initialize_team_df, read_video_in_batches, save_tracks_to_csv, install_requirements
@@ -35,6 +34,7 @@ install_requirements('requirements.txt')
 # Initialize the FastAPI app
 app = FastAPI()
 #exposing the server to public url
+from pyngrok import ngrok
 ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
 # Expose port 8000
 public_url = ngrok.connect(8000)
