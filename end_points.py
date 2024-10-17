@@ -1,7 +1,26 @@
 from utils import install_requirements, download_models
 
-install_requirements('requirements.txt')
-download_models()
+def requirements_installed():
+    # Check if a requirements marker file exists (or use any package check mechanism)
+    return os.path.exists('requirements_installed.flag')
+
+# Function to check if the models directory exists and contains the expected models
+def models_downloaded():
+    model_files = ['models/new_data.pt', 'models/Substitution.pt', 'models/playershirt.pt', 'models/old_data.pt']
+    return all(os.path.exists(model_file) for model_file in model_files)
+
+# Install requirements only if they haven't been installed yet
+if not requirements_installed():
+    print("Installing requirements...")
+    install_requirements('requirements.txt')
+    # Create a flag file to indicate that requirements have been installed
+    with open('requirements_installed.flag', 'w') as f:
+        f.write("Installed")
+
+# Download models only if they aren't already downloaded
+if not models_downloaded():
+    print("Downloading models...")
+    download_models()
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 import os
