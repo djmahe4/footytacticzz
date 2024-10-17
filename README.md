@@ -109,7 +109,7 @@ Note: this dataset is associated with this project
 
 ## References
 
-credit should be given for [Abdullah Tarek](https://github.com/abdullahtarek) amazing repository for providing all the informations needed to start as we used some of is modules to start our project.
+credit should be given for [Abdullah Tarek](https://github.com/abdullahtarek) amazing repository for providing all the informations needed to start as we used some of his modules to start our project.
 
 - [youtube link explaining every thing in Abdullah Tarek's repo](https://youtu.be/neBZ6huolkg?si=YxXXMiTmlvRzAoC-) 
 - [the repository](https://github.com/abdullahtarek/football_analysis)
