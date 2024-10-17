@@ -18,7 +18,6 @@ def save_tracks_to_csv(tracks, csv_path='output_tracks.csv'):
 
         # Iterate over the tracks for each frame and write to CSV
         for frame_num, (players, referees, ball, goalkeepers) in enumerate(
-                zip(tracks['players'], tracks['referees'], tracks['ball'], tracks['goalkeepers'])):
 
             # Write player tracks
             for track_id, track_info in players.items():
