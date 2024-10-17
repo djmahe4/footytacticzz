@@ -11,6 +11,8 @@ import google.generativeai as genai
 import uvicorn
 import cv2
 import gc
+import requests
+import gdown
 from pyngrok import ngrok
 import numpy as np
 # Import your modules here
@@ -47,8 +49,18 @@ json_outputs = {}
 class VideoPaths(BaseModel):
     video_paths: list[str]
 
+def download_video(url, save_path):
+    try:
+        # Download the video using gdown
+        gdown.download(url, save_path, quiet=False)
+        print(f"Downloaded video to {save_path}")
+        return True
+    except Exception as e:
+        print(f"Failed to download video from {url}: {e}")
+        return False
+
 # Define the process_videos function that contains your detailed processing logic
-def process_videos(video_paths):
+def process_videos(video_urls):
     global json_outputs
     # Clear previous outputs
     json_outputs = {}
@@ -56,19 +68,29 @@ def process_videos(video_paths):
       # Ensure dependencies are installed
 
     # Loop through each video path
-    for video_index, video_path in enumerate(video_paths):
+    os.makedirs('videos', exist_ok=True)
+
+    for video_index, video_url in enumerate(video_urls):
         df = initialize_dataframe()  # Initialize DataFrame for players
         team_df = initialize_team_df()  # Initialize DataFrame for teams
         tracker = Tracker('models/old_data.pt')  # Initialize tracker
         team_assigner = TeamAssigner()
+
+        # Download the video to 'videos' folder
+        video_filename = f"videos/video_{video_index}.mp4"
+        print(f"Downloading video from {video_url}...")
+        download_video(video_url, video_filename)
+
+        # Open the local video file using OpenCV
         
         # Set batch size
         batch_size = 200
-        video_reader = cv2.VideoCapture(video_path)
+        video_reader = cv2.VideoCapture(video_filename)
 
         # Get total number of frames in the video
         total_frames = int(video_reader.get(cv2.CAP_PROP_FRAME_COUNT))
-
+        print("total_frames: ")
+        print(total_frames)
         # Define possible formations
         possible_formations = ['4-3-3', '4-2-3-1', '4-3-2-1', '4-1-4-1', '3-5-2', '3-4-1-2', 
                                '4-4-2', '4-4-1-1', '5-4-1', '3-4-3', '4-1-2-1-2', '3-1-4-2', 
@@ -178,10 +200,12 @@ def process_videos(video_paths):
         # Fill in missing data
         df = df.fillna(0)
         print(df.columns)
+        print(len(df))
         # Final statistics processing
         player_stats = PlayerStats(df)
         team_1_df, team_2_df = player_stats.process_data()
-
+        print(len(team_1_df))
+        print(len(team_2_df))
         processor = SoccerMatchDataProcessorFullWithSubs(team_1_df, team_2_df, team_df)
         final_df = processor.process_match_data()
 
