@@ -187,7 +187,6 @@ def process_videos(video_paths):
 
         # Save CSVs
         output_suffix = f"_video_{video_index + 1}"
-        save_tracks_to_csv(tracks, csv_path=f'output_files_computer_vision/tracks_csv{output_suffix}.csv')
         df.to_csv(f'output_files_computer_vision/player_statistics{output_suffix}.csv', index=True)
         team_df.to_csv(f'output_files_computer_vision/team_statistics{output_suffix}.csv', index=True)
         team_1_df.to_csv(f'output_files_computer_vision/team_1_player_statistics{output_suffix}.csv', index=True)
