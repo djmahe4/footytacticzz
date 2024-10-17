@@ -1,17 +1,14 @@
-Python 3.x
 fastapi
 uvicorn
 pulp
 flask
 google-generativeai
-ultrallytics
+ultralytics
 supervision
 opencv-python
-gc
 numpy
 pandas
 pytesseract
-collections
 csv
 sys
 scikit-learn
