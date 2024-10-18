@@ -73,10 +73,10 @@ The following modules are used in this project:
 - view transformer: transforms the view based on the prespective of the field to make the calculations more accurate.
 
 ## TrainedModels
-- [Trained Yolo v8x on the most occuring objects like players, goalkeepers and goals](https://github.com/AbdelrahmanAtef01/Tactic_Zone/blob/main/models/old_data.pt)
-- [Trained Yolo v8x on the less occuring events like dribling, tackling , goal and goal line, etc](https://github.com/AbdelrahmanAtef01/Tactic_Zone/blob/main/models/new_data.pt)
-- [Trained Yolo v8x on player shirt numbers detection](https://github.com/AbdelrahmanAtef01/Tactic_Zone/blob/main/models/playershirt.pt)
-- [Trained Yolo v8x on digital numbers detection(substitution board numbers)](https://github.com/AbdelrahmanAtef01/Tactic_Zone/blob/main/models/Substitution.pt)
+- [Trained Yolo v8x on the most occuring objects like players, goalkeepers and goals](https://www.dropbox.com/scl/fi/5wh4yy2ego497sw7ut01y/old_data.pt?rlkey=pkktrpl7kudux5xbaxu2is550&st=ftxxrz0d&dl=1)
+- [Trained Yolo v8x on the less occuring events like dribling, tackling , goal and goal line, etc](https://www.dropbox.com/scl/fi/9zf9x3w7r4rizmnn9cbk3/new_data.pt?rlkey=h5gnex1tc0i5egsjpoe3hct5l&st=2araenae&dl=1)
+- [Trained Yolo v8x on player shirt numbers detection](https://www.dropbox.com/scl/fi/fmkdhhn8aas1jjr3l2xc3/playershirt.pt?rlkey=8kra62hs2fc36p677sm4ms32c&st=70rxlt6a&dl=1)
+- [Trained Yolo v8x on digital numbers detection(substitution board numbers)](https://www.dropbox.com/scl/fi/638s1flkxaeey0vv2vlrg/Substitution.pt?rlkey=j4720865x3afz53yfzx9xmazo&st=kg4o6z75&dl=1)
 
 
 ## Usage

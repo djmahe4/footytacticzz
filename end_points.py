@@ -91,7 +91,7 @@ def process_videos(video_urls):
         team_assigner = TeamAssigner()
 
         # Download the video to 'videos' folder
-        video_filename = f"input_videos/video_{video_index}.mp4"
+        video_filename = f"videos/video_{video_index}.mp4"
         download_video(video_url, video_filename)
 
         # Open the local video file using OpenCV
@@ -469,4 +469,5 @@ if __name__ == "__main__":
     ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
     # Expose port 8000
     public_url = ngrok.connect(8000)
+    print(f"Public URL: {public_url}")
     uvicorn.run("end_points:app", host="0.0.0.0", port=8000, reload=True)
