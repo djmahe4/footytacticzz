@@ -1,6 +1,5 @@
 from utils import install_requirements, download_models
 import os
-from IPython.display import display
 def requirements_installed():
     # Check if a requirements marker file exists (or use any package check mechanism)
     return os.path.exists('requirements_installed.flag')
@@ -12,7 +11,6 @@ def models_downloaded():
 
 # Install requirements only if they haven't been installed yet
 if not requirements_installed():
-    print("Installing requirements...")
     install_requirements('requirements.txt')
     # Create a flag file to indicate that requirements have been installed
     with open('requirements_installed.flag', 'w') as f:
@@ -20,7 +18,6 @@ if not requirements_installed():
 
 # Download models only if they aren't already downloaded
 if not models_downloaded():
-    print("Downloading models...")
     download_models()
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
@@ -31,7 +28,6 @@ import google.generativeai as genai
 import uvicorn
 import cv2
 import gc
-import requests
 import gdown
 from pyngrok import ngrok
 import numpy as np
@@ -73,10 +69,8 @@ def download_video(url, save_path):
     try:
         # Download the video using gdown
         gdown.download(url, save_path, quiet=False)
-        print(f"Downloaded video to {save_path}")
         return True
     except Exception as e:
-        print(f"Failed to download video from {url}: {e}")
         return False
 
 # Define the process_videos function that contains your detailed processing logic
@@ -97,8 +91,7 @@ def process_videos(video_urls):
         team_assigner = TeamAssigner()
 
         # Download the video to 'videos' folder
-        video_filename = f"videos/video_{video_index}.mp4"
-        print(f"Downloading video from {video_url}...")
+        video_filename = f"input_videos/video_{video_index}.mp4"
         download_video(video_url, video_filename)
 
         # Open the local video file using OpenCV
@@ -109,8 +102,6 @@ def process_videos(video_urls):
 
         # Get total number of frames in the video
         total_frames = int(video_reader.get(cv2.CAP_PROP_FRAME_COUNT))
-        print("total_frames: ")
-        print(total_frames)
         # Define possible formations
         possible_formations = ['4-3-3', '4-2-3-1', '4-3-2-1', '4-1-4-1', '3-5-2', '3-4-1-2', 
                                '4-4-2', '4-4-1-1', '5-4-1', '3-4-3', '4-1-2-1-2', '3-1-4-2', 
@@ -219,13 +210,9 @@ def process_videos(video_urls):
 
         # Fill in missing data
         df = df.fillna(0)
-        print(df.columns)
-        print(len(df))
         # Final statistics processing
         player_stats = PlayerStats(df)
         team_1_df, team_2_df = player_stats.process_data()
-        print(len(team_1_df))
-        print(len(team_2_df))
         processor = SoccerMatchDataProcessorFullWithSubs(team_1_df, team_2_df, team_df)
         final_df = processor.process_match_data()
 
@@ -347,7 +334,6 @@ def process_videos(video_urls):
 
     # Save recommended formations to CSV
     recommended_formations = model1.find_winning_rows(similar_rows)
-    display(similar_rows)
     recommended_formations.to_csv('output_files_recommendation_systems/recommended_formations.csv', index=False)
 
 
@@ -386,7 +372,6 @@ def process_videos(video_urls):
         else:
             selected_players.to_csv('output_files_recommendation_systems/combined_team.csv', index=False)
       i += 1
-      display(combined_team)
 
     """
                                   End of recommendation systems part
@@ -422,11 +407,8 @@ def process_videos(video_urls):
     match_summary_json = send_to_gemini_api_with_retry(match_summary_prompt)
 
     if match_summary_json:
-        print("Match Summary Result:")
-        print(json.dumps(match_summary_json, indent=4))
         json_outputs["match_summary"] = match_summary_json
     else:
-        print("Failed to retrieve valid JSON for match summary.")
         json_outputs["match_summary"] = "Failed to retrieve valid JSON for match summary."
 
     # Generate the suggestions prompt
@@ -434,11 +416,8 @@ def process_videos(video_urls):
     recommendation_json = send_to_gemini_api_with_retry(recommendation_prompt)
 
     if recommendation_json:
-        print("Recommendation Result:")
-        print(json.dumps(recommendation_json, indent=4))
         json_outputs["recommendations"] = recommendation_json
     else:
-        print("Failed to retrieve valid JSON for recommendations.")
         json_outputs["recommendations"] = "Failed to retrieve valid JSON for recommendations."
 
     # Generate the opponent analysis prompt
@@ -446,11 +425,8 @@ def process_videos(video_urls):
     opponent_analysis_json = send_to_gemini_api_with_retry(opponent_analysis_prompt)
 
     if opponent_analysis_json:
-        print("Opponent Analysis Result:")
-        print(json.dumps(opponent_analysis_json, indent=4))
         json_outputs["opponent_analysis"] = opponent_analysis_json
     else:
-        print("Failed to retrieve valid JSON for opponent analysis.")
         json_outputs["opponent_analysis"] = "Failed to retrieve valid JSON for opponent analysis."
 
     # Generate the training suggestions prompt
@@ -463,11 +439,8 @@ def process_videos(video_urls):
             "team_training_session": training_suggestions_json.get("team_training_session", ""),
             "worst_5_players_individual_sessions": training_suggestions_json.get("individual_sessions", {})[:4] 
         }
-        print("Training Suggestions Result:")
-        print(json.dumps(output, indent=4))
         json_outputs["training_suggestions"] = output
     else:
-        print("Failed to retrieve valid JSON for training suggestions.")
         json_outputs["training_suggestions"] = "Failed to retrieve valid JSON for training suggestions."
 
     # Return the final JSON outputs
@@ -496,5 +469,4 @@ if __name__ == "__main__":
     ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
     # Expose port 8000
     public_url = ngrok.connect(8000)
-    print(f"Public URL: {public_url}")
     uvicorn.run("end_points:app", host="0.0.0.0", port=8000, reload=True)

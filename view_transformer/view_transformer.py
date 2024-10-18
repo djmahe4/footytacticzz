@@ -46,5 +46,3 @@ class ViewTransformer():
                             tracks[object][frame_num][track_id]['position_transformed'] = position_trasnformed
                         else: 
                             tracks[object][frame_num][track_id]['position_transformed'] = tracks[object][frame_num][track_id]['position_adjusted']
-                        print("transformed")
-                        print(tracks[object][frame_num][track_id]['position_transformed'])
