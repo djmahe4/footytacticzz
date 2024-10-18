@@ -39,24 +39,16 @@ class CameraMovementEstimator():
                         else:
                             position_adjusted = (position[0] , position[1])
                         tracks[object][frame_num][track_id]['position_adjusted'] = position_adjusted
-                        print("adjusted")
-                        print(tracks[object][frame_num][track_id]['position_adjusted'])
                     else:
                         # Check if 'position' exists for the current frame
                         if 'position' in tracks[object][frame_num][track_id]:
-                            print("camera ball ")
-                            print(tracks[object][frame_num][track_id]['position'])
                             # Use the current frame's position
                             tracks[object][frame_num][track_id]['position_adjusted'] = tracks[object][frame_num][track_id]['position']
                         elif frame_num > 0 and 'position' in tracks[object][frame_num - 1][track_id]:
-                            print("camera ball ")
-                            print(tracks[object][frame_num-1][track_id]['position'])
                             tracks[object][frame_num][track_id]['position_adjusted'] = tracks[object][frame_num - 1][track_id]['position']
                         else:
                             # Fallback to the default (0, 0)
-                            tracks[object][frame_num][track_id]['position_adjusted'] = (0, 0)                       
-                        print("ball adjusted")
-                        print(tracks[object][frame_num][track_id]['position_adjusted'])
+                            tracks[object][frame_num][track_id]['position_adjusted'] = (0, 0)  
 
     def get_camera_movement(self, frames):
         camera_movement = [[0, 0]] * len(frames)
