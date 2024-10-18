@@ -1,5 +1,6 @@
 from utils import install_requirements, download_models
 import os
+from IPython.display import display
 def requirements_installed():
     # Check if a requirements marker file exists (or use any package check mechanism)
     return os.path.exists('requirements_installed.flag')
@@ -266,69 +267,56 @@ def process_videos(video_urls):
         'player_data3': player_data3,
         'player_data4': player_data4,
     }
-    def euclidean_distance(color1, color2):
-      return np.sqrt(np.sum((color1 - color2) ** 2))
-    def clean_color_string(color_string):
-      color_list = color_string.strip("[]").split()  # Split on spaces
-      return np.array(color_list, dtype=float)
-# Extract the first team's color from mobile_data1
-    first_team_color = np.array(mobile_data1.iloc[0]['Team_Color '].strip("[]").split(","), dtype=float)
+    first_team_color_mobile1 = clean_team_color(mobile_data1.iloc[0]['Team_Color '])
 
-# Extract the opponent's team color from mobile_data2
-    opponent_team_color = np.array(mobile_data2.iloc[0]['Team_Color '].strip("[]").split(","), dtype=float)
-    # Extract the first team's color from mobile_data1
-    def find_closest_player_dataset(player_data, target_color):
-      non_goalkeeper_data = player_data[player_data['position'] != 'goalkeeper']  # Exclude goalkeepers
-      player_colors = non_goalkeeper_data['team_color'].apply(clean_color_string)
-      distances = np.array([euclidean_distance(target_color, player_color) for player_color in player_colors])
+    # Extract the opponent's team color from mobile_data2
+    first_team_color_mobile2 = clean_team_color(mobile_data2.iloc[0]['Team_Color '])
 
-      if len(distances) > 0:
-        closest_distance = np.min(distances)
-      else:
-        closest_distance = np.inf  # Handle case when no players are available
+    # Handle player data 1 and 2 based on mobile_data1
+    closest_player_data_1_2 = []
+    for player_data_key in ['player_data1', 'player_data2']:
+      closest_player_dataset_key = find_closest_player_dataset(player_data_dict[player_data_key], first_team_color_mobile1, player_data_key)
+      if closest_player_dataset_key:
+        closest_player_data_1_2.append(player_data_dict[closest_player_dataset_key])
 
-      return closest_distance
+    # Combine the closest data for player 1 and 2 based on mobile_data1
+    closest_player_data_mobile1 = pd.concat(closest_player_data_1_2, ignore_index=True)
 
-# Get the closest player dataset based on color
-    def get_closest_player_data(mobile_color, threshold=10):
-      distances = {}
+    # Process the player stats
+    player_stats = MyPlayerStats(closest_player_data_mobile1, correct_shirt_numbers, mobile_data1)
+    closest_player_data_mobile1 = player_stats.process_data()
 
-      distances['player_data1'] = find_closest_player_dataset(player_data1, mobile_color)
-      distances['player_data2'] = find_closest_player_dataset(player_data2, mobile_color)
-      distances['player_data3'] = find_closest_player_dataset(player_data3, mobile_color)
-      distances['player_data4'] = find_closest_player_dataset(player_data4, mobile_color)
+    # Correct the shirt numbers and drop the temporary column
+    closest_player_data_mobile1['shirt_number'] = closest_player_data_mobile1['corrected_shirt_number']
+    closest_player_data_mobile1.drop(columns=['corrected_shirt_number'], inplace=True)
 
-      # Get the closest player data with minimum distance
-      closest_player_dataset = min(distances, key=distances.get)
+    closest_player_data_mobile1.to_csv('output_files_recommendation_systems/closest_player_data_mobile1.csv', index=False)
 
-      return closest_player_dataset
+    # Handle player data 3 and 4 based on mobile_data2
+    closest_player_data_3_4 = []
+    for player_data_key in ['player_data3', 'player_data4']:
+      closest_player_dataset_key = find_closest_player_dataset(player_data_dict[player_data_key], first_team_color_mobile2, player_data_key)
+      if closest_player_dataset_key:
+        closest_player_data_3_4.append(player_data_dict[closest_player_dataset_key])
 
-    # Find closest player datasets for mobile_data1
-    closest_player_data_first_team = get_closest_player_data(first_team_color)
-    closest_player_data_first_team = player_data_dict[closest_player_data_first_team]
+    # Combine the closest data for player 3 and 4 based on mobile_data2
+    closest_player_data_mobile2 = pd.concat(closest_player_data_3_4, ignore_index=True)
 
-    # Output the final closest player datasets
+    # Process the player stats
+    player_stats = MyPlayerStats(closest_player_data_mobile2, correct_shirt_numbers2, mobile_data2)
+    closest_player_data_mobile2 = player_stats.process_data()
 
+    # Correct the shirt numbers and drop the temporary column
+    closest_player_data_mobile2['shirt_number'] = closest_player_data_mobile2['corrected_shirt_number']
+    closest_player_data_mobile2.drop(columns=['corrected_shirt_number'], inplace=True)
 
-    position_mapping = dict(zip(mobile_data1['Shirt_Number'], mobile_data1['Position']))
-
-# Update positions in closest_player_data_first_team based on the mapping
-    for index, player in closest_player_data_first_team.iterrows():
-      shirt_number = player['shirtNumber']
-
-      # Check if the shirt number exists in the mapping
-      if shirt_number in position_mapping:
-        closest_player_data_first_team.at[index, 'position'] = position_mapping[shirt_number]
-
-
-    player_data = closest_player_data_first_team
-
+    closest_player_data_mobile2.to_csv('output_files_recommendation_systems/closest_player_data_mobile2.csv', index=False)
 
     # From here on, use only closest_player_data_mobile1 in the rest of the code
 
     # Find the closest matching rows in teams
-    closest_row_team1 = find_closest_match(combined_teams, first_team_color)
-    # opponent_team_color = clean_team_color(mobile_data2.iloc[0]['Team_Color '])
+    closest_row_team1 = find_closest_match(combined_teams, first_team_color_mobile1)
+    opponent_team_color = clean_team_color(mobile_data2.iloc[0]['Team_Color '])
     closest_row_team2 = find_closest_match(combined_teams, opponent_team_color)
 
     combined_closest_rows = pd.DataFrame([closest_row_team1, closest_row_team2])
@@ -343,6 +331,7 @@ def process_videos(video_urls):
     data_cleaned = pd.read_csv('recommendation_systems_input_files/data_cleaned.csv')
 
     # Use the closest player data based on mobile data 1
+    player_data = closest_player_data_mobile1
 
     player_data['shirt_number'] = player_data.pop('Shirt_Number')
     player_data['pass_success'] = player_data.pop('%_pass_success')
@@ -358,15 +347,16 @@ def process_videos(video_urls):
 
     # Save recommended formations to CSV
     recommended_formations = model1.find_winning_rows(similar_rows)
+    display(similar_rows)
     recommended_formations.to_csv('output_files_recommendation_systems/recommended_formations.csv', index=False)
+
 
     # Select the first match data row
     match_data = recommended_formations
-
     i = 0
     solution = False
     while i < 10 and not solution:
-      input_row = match_data.iloc[0].to_dict()
+      input_row = match_data.iloc[i].to_dict()
       input_row['tackles_success'] = input_row.pop('tackle_success')
 
       # Initialize the second model to recommend a team based on input row and processed player data
@@ -375,6 +365,7 @@ def process_videos(video_urls):
 
       # If a team was successfully selected, display the results
       if selected_players is not None:
+        solution = True
         selected_players['status'] = 'Starting 11'  # Add a column to indicate starting players
 
         # Remove the selected players and recommend substitutes
@@ -395,6 +386,7 @@ def process_videos(video_urls):
         else:
             selected_players.to_csv('output_files_recommendation_systems/combined_team.csv', index=False)
       i += 1
+      display(combined_team)
 
     """
                                   End of recommendation systems part
