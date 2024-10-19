@@ -11,3 +11,4 @@ pandas
 pytesseract
 scikit-learn
 pyngrok
+gdown
