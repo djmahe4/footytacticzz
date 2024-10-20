@@ -12,3 +12,4 @@ pytesseract
 scikit-learn
 pyngrok
 gdown
+pyshorteners
