@@ -495,7 +495,7 @@ def upload_video_paths(video_data: VideoPaths, background_tasks: BackgroundTasks
 @app.get("/get_json_outputs")
 def get_json_outputs():
     if not json_outputs:
-        raise HTTPException(status_code=404, detail="No JSON outputs available yet. Videos might still be processing.")
+        raise HTTPException(status_code=200, detail="No JSON outputs available yet. Videos might still be processing.")
     
     return json_outputs
 
