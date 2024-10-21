@@ -473,31 +473,21 @@ def get_json_outputs():
     
     return json_outputs
 
-cred = credentials.Certificate("/content/tactic-zone-firebase-adminsdk-a383d-bc5d5c386c.json")  # Replace with your downloaded JSON file path
-firebase_admin.initialize_app(cred, {
-    'databaseURL': 'https://tactic-zone-default-rtdb.firebaseio.com/'  # Replace with your actual Firebase Database URL
-})
-
-# Set ngrok auth token
-ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
-
-# Expose port 8000
-tunnel = ngrok.connect(8000)
-
-# Extract the public URL as a string
-public_url = tunnel.public_url
-
-# Shorten the ngrok URL
-s = pyshorteners.Shortener()
-short_url = s.tinyurl.short(public_url)
-
-# Print the shortened public URL
-print(f"Public URL: {short_url}")
-
-# Update the shortened URL in Firebase
-ref = db.reference('api_url')  # Replace 'api_url' with the field you want to update
-ref.set(short_url)
-
-# Only run the Uvicorn server if this is the main module
 if __name__ == "__main__":
-    uvicorn.run("end_points:app", host="0.0.0.0", port=8000, reload=True)
+      ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
+
+    # Expose port 8000
+      tunnel = ngrok.connect(8000)
+
+    # Extract the public URL as a string
+      public_url = tunnel.public_url
+
+    # Shorten the ngrok URL
+      s = pyshorteners.Shortener()
+      short_url = s.tinyurl.short(public_url)
+
+    # Print the shortened public URL
+      print(f"Public URL: {short_url}")
+
+    # Run the app with uvicorn
+      uvicorn.run("end_points:app", host="0.0.0.0", port=8000, reload=True)
