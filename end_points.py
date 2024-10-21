@@ -58,6 +58,24 @@ from utils import clean_team_color, find_closest_player_dataset, find_closest_ma
 from utils import send_to_gemini_api_with_retry
 from generate_prompt import generate_match_summary_prompt, generate_player_suggestions_prompt, generate_opponent_analysis_prompt, generate_training_suggestions_prompt
 # Initialize the FastAPI app
+import pyshorteners
+from pyngrok import ngrok
+import uvicorn
+import firebase_admin
+from firebase_admin import credentials, db
+
+# Initialize Firebase Admin SDK
+def initialize_firebase():
+    # Replace 'path/to/your-firebase-adminsdk.json' with the path to your Firebase credentials JSON file
+    cred = credentials.Certificate("/kaggle/input/mohamed-json/tactic-zone-firebase-adminsdk-a383d-bc5d5c386c.json")
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': 'https://tactic-zone-default-rtdb.firebaseio.com/'  # Replace with your Firebase Realtime Database URL
+    })
+
+def update_firebase_api_url(short_url):
+    # Reference the Realtime Database and set the 'API_URL' value
+    ref = db.reference('/')
+    ref.update({'API_URL': short_url})
 app = FastAPI()
 #exposing the server to public url
 
@@ -482,22 +500,27 @@ def get_json_outputs():
     return json_outputs
 
 if __name__ == "__main__":
+    # Initialize Firebase
+    initialize_firebase()
 
-# Set ngrok auth token
-  ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
+    # Set ngrok auth token
+    ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
 
-# Expose port 8000
-  tunnel = ngrok.connect(8000)
+    # Expose port 8000
+    tunnel = ngrok.connect(8000)
 
-# Extract the public URL as a string
-  public_url = tunnel.public_url
+    # Extract the public URL as a string
+    public_url = tunnel.public_url
 
-# Shorten the ngrok URL
-  s = pyshorteners.Shortener()
-  short_url = s.tinyurl.short(public_url)
+    # Shorten the ngrok URL
+    s = pyshorteners.Shortener()
+    short_url = s.tinyurl.short(public_url)
 
-# Print the shortened public URL
-  print(f"Public URL: {short_url}")
+    # Print the shortened public URL
+    print(f"Public URL: {short_url}")
 
-# Run the app with uvicorn
-  uvicorn.run("end_points:app", host="0.0.0.0", port=8000, reload=True)
+    # Update the shortened public URL in Firebase Realtime Database
+    update_firebase_api_url(short_url)
+
+    # Run the app with uvicorn
+    uvicorn.run("end_points:app", host="0.0.0.0", port=8000, reload=True)
