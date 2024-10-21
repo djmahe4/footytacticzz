@@ -520,7 +520,7 @@ if __name__ == "__main__":
     print(f"Public URL: {short_url}")
 
     # Update the shortened public URL in Firebase Realtime Database
-    update_firebase_api_url(short_url)
+    update_firebase_api_url(public_url)
 
     # Run the app with uvicorn
     uvicorn.run("end_points:app", host="0.0.0.0", port=8000, reload=True)
