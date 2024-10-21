@@ -22,14 +22,6 @@ if not models_downloaded():
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
 
-import pyshorteners
-from pyngrok import ngrok
-import uvicorn
-import firebase_admin
-from firebase_admin import credentials, db
-import pyshorteners
-from pyngrok import ngrok
-import uvicorn
 import pandas as pd
 import json
 import google.generativeai as genai
@@ -474,20 +466,8 @@ def get_json_outputs():
     return json_outputs
 
 if __name__ == "__main__":
-      ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
-
+    ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
     # Expose port 8000
-      tunnel = ngrok.connect(8000)
-
-    # Extract the public URL as a string
-      public_url = tunnel.public_url
-
-    # Shorten the ngrok URL
-      s = pyshorteners.Shortener()
-      short_url = s.tinyurl.short(public_url)
-
-    # Print the shortened public URL
-      print(f"Public URL: {short_url}")
-
-    # Run the app with uvicorn
-      uvicorn.run("end_points:app", host="0.0.0.0", port=8000, reload=True)
+    public_url = ngrok.connect(8000)
+    print(f"Public URL: {public_url}")
+    uvicorn.run("end_points:app", host="0.0.0.0", port=8000, reload=True)
