@@ -3,6 +3,8 @@ import pandas as pd
 import subprocess
 import sys
 import cv2
+import firebase_admin
+from firebase_admin import credentials, db
 
 def save_tracks_to_csv(tracks, csv_path='output_tracks.csv'):
     """
@@ -119,3 +121,16 @@ def download_models():
     subprocess.run(["sed", "-i", "s/\r$//", "download_models.sh"])
     # Run the bash script
     subprocess.run(["bash", "download_models.sh"])
+
+# Initialize Firebase Admin SDK
+def initialize_firebase():
+    # Replace 'path/to/your-firebase-adminsdk.json' with the path to your Firebase credentials JSON file
+    cred = credentials.Certificate("fire_base/fire_base.json")
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': 'https://tactic-zone-default-rtdb.firebaseio.com/'  # Replace with your Firebase Realtime Database URL
+    })
+
+def update_firebase_api_url(short_url):
+    # Reference the Realtime Database and set the 'API_URL' value
+    ref = db.reference('/')
+    ref.update({'API_URL': short_url})
