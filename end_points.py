@@ -25,7 +25,11 @@ from pydantic import BaseModel
 import pyshorteners
 from pyngrok import ngrok
 import uvicorn
-
+import firebase_admin
+from firebase_admin import credentials, db
+import pyshorteners
+from pyngrok import ngrok
+import uvicorn
 import pandas as pd
 import json
 import google.generativeai as genai
@@ -469,23 +473,31 @@ def get_json_outputs():
     
     return json_outputs
 
-if __name__ == "__main__":
+cred = credentials.Certificate("/kaggle/input/mohamed-json/tactic-zone-firebase-adminsdk-a383d-bc5d5c386c.json")  # Replace with your downloaded JSON file path
+firebase_admin.initialize_app(cred, {
+    'databaseURL': 'https://tactic-zone-default-rtdb.firebaseio.com/'  # Replace with your actual Firebase Database URL
+})
 
 # Set ngrok auth token
-  ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
+ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
 
 # Expose port 8000
-  tunnel = ngrok.connect(8000)
+tunnel = ngrok.connect(8000)
 
 # Extract the public URL as a string
-  public_url = tunnel.public_url
+public_url = tunnel.public_url
 
 # Shorten the ngrok URL
-  s = pyshorteners.Shortener()
-  short_url = s.tinyurl.short(public_url)
+s = pyshorteners.Shortener()
+short_url = s.tinyurl.short(public_url)
 
 # Print the shortened public URL
-  print(f"Public URL: {short_url}")
+print(f"Public URL: {short_url}")
 
-# Run the app with uvicorn
-  uvicorn.run("end_points:app", host="0.0.0.0", port=8000, reload=True)
+# Update the shortened URL in Firebase
+ref = db.reference('api_url')  # Replace 'api_url' with the field you want to update
+ref.set(short_url)
+
+# Only run the Uvicorn server if this is the main module
+if __name__ == "__main__":
+    uvicorn.run("end_points:app", host="0.0.0.0", port=8000, reload=True)
