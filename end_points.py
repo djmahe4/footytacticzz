@@ -19,7 +19,7 @@ if not requirements_installed():
 # Download models only if they aren't already downloaded
 if not models_downloaded():
     download_models()
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, BackgroundTasks, HTTPException
 from pydantic import BaseModel
 
 import pyshorteners
@@ -481,14 +481,14 @@ def process_videos(video_urls):
     return json_outputs
 
 @app.post("/process_videos")
-def upload_video_paths(video_data: VideoPaths):
+def upload_video_paths(video_data: VideoPaths, background_tasks: BackgroundTasks):
     video_paths = video_data.video_paths
     
     if len(video_paths) != 2:
         raise HTTPException(status_code=400, detail="Please provide exactly 2 video paths.")
     
     # Process the videos (this will call the process_videos function)
-    output = process_videos(video_paths)
+    background_tasks.add_task(process_videos, video_paths)
     
     return {"message": "Videos are being processed", "video_paths": video_paths}
 
