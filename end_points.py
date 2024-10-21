@@ -471,17 +471,17 @@ def get_json_outputs():
 
 if __name__ == "__main__":# Set ngrok auth token
 
-ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
+    ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
 
-# Expose port 8000
-public_url = ngrok.connect(8000)
+    # Expose port 8000
+    public_url = ngrok.connect(8000)
 
-# Shorten the ngrok URL
-s = pyshorteners.Shortener()
-short_url = s.tinyurl.short(public_url)
+    # Shorten the ngrok URL
+    s = pyshorteners.Shortener()
+    short_url = s.tinyurl.short(public_url)
 
-# Print the shortened public URL
-print(f"Public URL: {short_url}")
+    # Print the shortened public URL
+    print(f"Public URL: {short_url}")
 
-# Run the app with uvicorn
-uvicorn.run("end_points:app", host="0.0.0.0", port=8000, reload=True)
+    # Run the app with uvicorn
+    uvicorn.run("end_points:app", host="0.0.0.0", port=8000, reload=True)
