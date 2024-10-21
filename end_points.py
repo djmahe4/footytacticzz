@@ -424,6 +424,18 @@ def process_videos(video_urls):
     else:
         json_outputs["recommendations"] = "Failed to retrieve valid JSON for recommendations."
 
+    if best_formations_str:
+        json_outputs["possible Formations"] = best_formations_str
+
+    else:
+        json_outputs["possible Formations"] = "Failed to retrieve valid JSON for best_formations."
+
+    if match_players_recommendations_str:
+        json_outputs["match players recommendation"] = match_players_recommendations_str
+
+    else:
+        json_outputs["match players recommendation"] = "Failed to retrieve valid JSON for match_players_recommendations."
+
     # Generate the opponent analysis prompt
     opponent_analysis_prompt = generate_opponent_analysis_prompt(opponent_info_str, opponent_players_str)
     opponent_analysis_json = send_to_gemini_api_with_retry(opponent_analysis_prompt)
