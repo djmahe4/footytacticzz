@@ -479,7 +479,7 @@ firebase_admin.initialize_app(cred, {
 })
 
 # Set ngrok auth token
-ngrok.set_auth_token('2nW3LEQOWteipWdNmnsZdK36twk_3FefcVwQwbUikEj9H3jhw')
+ngrok.set_auth_token('2nj0lxmLrXFlpWpLX9OjrUBLEDd_4joBj5joYFQEGYUXXwk1r')
 
 # Expose port 8000
 tunnel = ngrok.connect(8000)
