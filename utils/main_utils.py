@@ -125,7 +125,7 @@ def download_models():
 # Initialize Firebase Admin SDK
 def initialize_firebase():
     # Replace 'path/to/your-firebase-adminsdk.json' with the path to your Firebase credentials JSON file
-    cred = credentials.Certificate("fire_base/fire_base.json")
+    cred = credentials.Certificate("/kaggle/input/mohamed-json/tactic-zone-firebase-adminsdk-a383d-bc5d5c386c.json")
     firebase_admin.initialize_app(cred, {
         'databaseURL': 'https://tactic-zone-default-rtdb.firebaseio.com/'  # Replace with your Firebase Realtime Database URL
     })
