@@ -1,6 +1,5 @@
 from utils import install_requirements, download_models
 import os
-
 def requirements_installed():
     # Check if a requirements marker file exists (or use any package check mechanism)
     return os.path.exists('requirements_installed.flag')
@@ -36,13 +35,8 @@ import gc
 import gdown
 from pyngrok import ngrok
 import numpy as np
-
-import pyshorteners
-from pyngrok import ngrok
-import uvicorn
-
 # Import your modules here
-from utils import initialize_dataframe, initialize_team_df, read_video_in_batches, initialize_firebase, update_firebase_api_url 
+from utils import initialize_dataframe, initialize_team_df, read_video_in_batches, save_tracks_to_csv 
 from trackers import Tracker
 from team_assigner import TeamAssigner
 from camera_movement_estimator import CameraMovementEstimator
@@ -63,9 +57,28 @@ from recommendation_systems import MyPlayerStats, FirstModel, SecondModel
 from utils import clean_team_color, find_closest_player_dataset, find_closest_match
 from utils import send_to_gemini_api_with_retry
 from generate_prompt import generate_match_summary_prompt, generate_player_suggestions_prompt, generate_opponent_analysis_prompt, generate_training_suggestions_prompt
-
 # Initialize the FastAPI app
+import pyshorteners
+from pyngrok import ngrok
+import uvicorn
+import firebase_admin
+from firebase_admin import credentials, db
+
+# Initialize Firebase Admin SDK
+def initialize_firebase():
+    # Replace 'path/to/your-firebase-adminsdk.json' with the path to your Firebase credentials JSON file
+    cred = credentials.Certificate("/kaggle/input/mohamed-json/tactic-zone-firebase-adminsdk-a383d-bc5d5c386c.json")
+    firebase_admin.initialize_app(cred, {
+        'databaseURL': 'https://tactic-zone-default-rtdb.firebaseio.com/'  # Replace with your Firebase Realtime Database URL
+    })
+
+def update_firebase_api_url(short_url):
+    # Reference the Realtime Database and set the 'API_URL' value
+    ref = db.reference('/')
+    ref.update({'API_URL': short_url})
 app = FastAPI()
+#exposing the server to public url
+
 
 # Global variable to store video paths and JSON outputs
 json_outputs = {}
