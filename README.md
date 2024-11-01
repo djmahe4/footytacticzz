@@ -97,6 +97,11 @@ Note: the project should only be used with eagle eye 1080p or higher match video
 
 ## DataSets
 - [11 labels (players, referees, ball, goalkeeper, goal, goalline, substitution board, dribble, tackling, Auriel_duel, injurie) manually annotated 2000 photos data that covers most of the project object detection features](https://universe.roboflow.com/abdelrahmanatef-kd8yt/tactic_zone-c0oag)
+  
+  <a href="https://universe.roboflow.com/abdelrahmanatef-kd8yt/ball-analysis-data-all-classes-full-size-with-a-a-trained-model">
+      <img src="https://app.roboflow.com/images/download-dataset-badge.svg"></img>
+  </a>
+
 Note: this dataset is associated with this project
 
 - [player shirt number object detection data(7000 photos)]( https://universe.roboflow.com/volleyai-actions/jersey-number-detection-s01j4 )
